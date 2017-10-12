@@ -31,7 +31,7 @@ class QtConan(ConanFile):
 	""" Qt Conan package """
 
 	name = "Qt"
-	version = "5.8.0"
+	version = "5.9.2"
 	description = "Conan.io package for Qt library."
 	source_dir = "qt5"
 	settings = "os", "arch", "compiler", "build_type"
@@ -135,9 +135,8 @@ class QtConan(ConanFile):
 		if self.options.xmlpatterns:
 			submodules.append("qtxmlpatterns")
 
-		major = ".".join(self.version.split(".")[:2])
 		self.run("git clone https://code.qt.io/qt/qt5.git")
-		self.run("cd %s && git checkout %s" % (self.source_dir, major))
+		self.run("cd %s && git checkout %s" % (self.source_dir, self.version))
 		self.run("cd %s && perl init-repository --no-update --module-subset=%s" % (self.source_dir, ",".join(submodules)))
 		self.run("cd %s && git checkout v%s && git submodule update" % (self.source_dir, self.version))
 
