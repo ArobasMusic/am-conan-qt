@@ -1,22 +1,23 @@
+""" PyLint is boring """
 
 import os
 from conans import ConanFile, CMake
 
 # This easily allows to copy the package in other user or channel
-CHANNEL = os.getenv("CONAN_CHANNEL", "testing")
-USERNAME = os.getenv("CONAN_USERNAME", "osechet")
+CHANNEL = os.getenv("CONAN_CHANNEL", "stable")
+USERNAME = os.getenv("CONAN_USERNAME", "amusic")
 
 class QtTestConan(ConanFile):
     """ Qt Conan package test """
 
-    requires = "Qt/5.8.0@%s/%s" % (USERNAME, CHANNEL)
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "virtualenv"
+    generators = "cmake"
 
     def build(self):
-        cmake = CMake(self.settings)
-        self.run('cmake "%s" %s' % (self.conanfile_directory, cmake.command_line))
-        self.run("cmake --build . %s" % cmake.build_config)
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
 
     def test(self):
         if self.settings.os == "Windows":

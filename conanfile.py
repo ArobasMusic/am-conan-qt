@@ -1,8 +1,8 @@
 import os
 
 from distutils.spawn import find_executable
-from conans import AutoToolsBuildEnvironment, ConanFile, tools, VisualStudioBuildEnvironment
-from conans.tools import cpu_count, os_info, SystemPackageTool
+from conans import ConanFile, tools, VisualStudioBuildEnvironment
+from conans.tools import cpu_count
 
 def which(program):
     """
@@ -51,51 +51,10 @@ class QtConan(ConanFile):
         "xmlpatterns": [True, False],
         "openssl": ["no", "yes", "linked"]
     }
-    default_options = "shared=True", "opengl=desktop", "canvas3d=False", "gamepad=False", "graphicaleffects=False", "imageformats=False", "location=False", "serialport=False", "svg=False", "tools=False", "webengine=False", "websockets=False", "xmlpatterns=False", "openssl=no"
+    default_options = "shared=True", "opengl=dynamic", "canvas3d=False", "gamepad=False", "graphicaleffects=False", "imageformats=False", "location=False", "serialport=False", "svg=False", "tools=False", "webengine=False", "websockets=False", "xmlpatterns=False", "openssl=no"
     url = "http://github.com/osechet/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
-
-    def system_requirements(self):
-        pack_names = None
-        if os_info.linux_distro == "ubuntu":
-            pack_names = [
-                "libgl1-mesa-dev",
-                "libxcb1",
-                "libxcb1-dev",
-                "libx11-xcb1",
-                "libx11-xcb-dev",
-                "libxcb-keysyms1",
-                "libxcb-keysyms1-dev",
-                "libxcb-image0",
-                "libxcb-image0-dev",
-                "libxcb-shm0",
-                "libxcb-shm0-dev",
-                "libxcb-icccm4",
-                "libxcb-icccm4-dev",
-                "libxcb-sync1",
-                "libxcb-sync-dev",
-                "libxcb-xfixes0-dev",
-                "libxrender-dev",
-                "libxcb-shape0-dev",
-                "libxcb-randr0-dev",
-                "libxcb-render-util0",
-                "libxcb-render-util0-dev",
-                "libxcb-glx0-dev",
-                "libxcb-xinerama0",
-                "libxcb-xinerama0-dev"
-            ]
-
-            if self.settings.arch == "x86":
-                full_pack_names = []
-                for pack_name in pack_names:
-                    full_pack_names += [pack_name + ":i386"]
-                pack_names = full_pack_names
-
-        if pack_names:
-            installer = SystemPackageTool()
-            installer.update() # Update the package database
-            installer.install(" ".join(pack_names)) # Install the package
 
     def config_options(self):
         if self.settings.os != "Windows":
@@ -136,19 +95,12 @@ class QtConan(ConanFile):
             submodules.append("qtxmlpatterns")
 
         self.run("git clone https://code.qt.io/qt/qt5.git")
-        self.run("cd %s && git checkout %s" % (self.source_dir, self.version))
+        self.run("cd %s && git checkout v%s" % (self.source_dir, self.version))
         self.run("cd %s && perl init-repository --no-update --module-subset=%s" % (self.source_dir, ",".join(submodules)))
-        self.run("cd %s && git checkout v%s && git submodule update" % (self.source_dir, self.version))
+        self.run("cd %s && git submodule update" % self.source_dir)
 
         if self.settings.os != "Windows":
             self.run("chmod +x ./%s/configure" % self.source_dir)
-        else:
-            # Fix issue with sh.exe and cmake on Windows
-            # This solution isn't good at all but I cannot find anything else
-            sh_path = which("sh.exe")
-            if sh_path:
-                fpath, _ = os.path.split(sh_path)
-                self.run("ren \"%s\" _sh.exe" % os.path.join(fpath, "sh.exe"))
 
     def build(self):
         """ Define your project building. You decide the way of building it
@@ -168,11 +120,8 @@ class QtConan(ConanFile):
         else:
             args.append("-release")
 
-        if self.settings.os == "Windows":
-            if self.settings.compiler == "Visual Studio":
-                self._build_msvc(args)
-            else:
-                self._build_mingw(args)
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
+            self._build_msvc(args)
         else:
             self._build_unix(args)
 
@@ -187,88 +136,51 @@ class QtConan(ConanFile):
 
         env = {}
         env.update({'PATH': [
-            '%s/qtbase/bin' % self.conanfile_directory,
-            '%s/gnuwin32/bin' % self.conanfile_directory,
-            '%s/qtrepotools/bin' % self.conanfile_directory
+            'C:\\Perl64\\bin',
+            'C:\\Program Files (x86)\\Windows Kits\\8.1\\bin\\x86',
+            '%s\\qtbase\\bin' % self.conanfile_directory,
+            '%s\\gnuwin32\\bin' % self.conanfile_directory,
+            '%s\\qtrepotools\\bin' % self.conanfile_directory
         ]})
 
         # it seems not enough to set the vcvars for older versions
         if self.settings.compiler == "Visual Studio":
             if self.settings.compiler.version == "14":
-                env.update({'QMAKESPEC': 'win32-msvc2015'})
                 args += ["-platform win32-msvc2015"]
             if self.settings.compiler.version == "12":
-                env.update({'QMAKESPEC': 'win32-msvc2013'})
                 args += ["-platform win32-msvc2013"]
             if self.settings.compiler.version == "11":
-                env.update({'QMAKESPEC': 'win32-msvc2012'})
                 args += ["-platform win32-msvc2012"]
             if self.settings.compiler.version == "10":
-                env.update({'QMAKESPEC': 'win32-msvc2010'})
                 args += ["-platform win32-msvc2010"]
+
+        args += ["-opengl %s" % self.options.opengl]
+        if self.options.opengl == "dynamic":
+            args += ["-angle"]
+            env.update({'QT_ANGLE_PLATFORM': 'd3d11'})
+
+        if self.options.openssl == "no":
+            args += ["-no-openssl"]
+        elif self.options.openssl == "yes":
+            args += ["-openssl"]
+        else:
+            args += ["-openssl-linked"]
 
         env_build = VisualStudioBuildEnvironment(self)
         env.update(env_build.vars)
 
-        # Workaround for conan-io/conan#1408
-        for name, value in env.items():
-            if not value:
-                del env[name]
         with tools.environment_append(env):
             vcvars = tools.vcvars_command(self.settings)
-
-            args += ["-opengl %s" % self.options.opengl]
-            if self.options.openssl == "no":
-                args += ["-no-openssl"]
-            elif self.options.openssl == "yes":
-                args += ["-openssl"]
-            else:
-                args += ["-openssl-linked"]
 
             self.run("cd %s && %s && set" % (self.source_dir, vcvars))
             self.run("cd %s && %s && configure %s" % (self.source_dir, vcvars, " ".join(args)))
             self.run("cd %s && %s && %s %s" % (self.source_dir, vcvars, build_command, " ".join(build_args)))
             self.run("cd %s && %s && %s install" % (self.source_dir, vcvars, build_command))
 
-    def _build_mingw(self, args):
-        env_build = AutoToolsBuildEnvironment(self)
-        env = {
-            'PATH': [
-                '%s/bin' % self.conanfile_directory,
-                '%s/qtbase/bin' % self.conanfile_directory,
-                '%s/gnuwin32/bin' % self.conanfile_directory,
-                '%s/qtrepotools/bin' % self.conanfile_directory
-            ],
-            'QMAKESPEC': 'win32-g++'
-        }
-        env.update(env_build.vars)
-        with tools.environment_append(env):
-            # Workaround for configure using clang first if in the path
-            new_path = []
-            for item in os.environ['PATH'].split(';'):
-                if item != 'C:\\Program Files\\LLVM\\bin':
-                    new_path.append(item)
-            os.environ['PATH'] = ';'.join(new_path)
-            # end workaround
-            args += [
-                "-developer-build",
-                "-opengl %s" % self.options.opengl,
-                "-platform win32-g++"
-            ]
-            self.output.info("Using '%s' threads" % str(cpu_count()))
-            self.run("cd %s && configure.bat %s" % (self.source_dir, " ".join(args)))
-            self.run("cd %s && mingw32-make -j %s" % (self.source_dir, str(cpu_count())))
-            self.run("cd %s && mingw32-make install" % (self.source_dir))
-
     def _build_unix(self, args):
-        if self.settings.os == "Linux":
-            args += ["-silent", "-xcb"]
-            if self.settings.arch == "x86":
-                args += ["-platform linux-g++-32"]
-        else:
-            args += ["-silent", "-no-framework"]
-            if self.settings.arch == "x86":
-                args += ["-platform macx-clang-32"]
+        args += ["-silent", "-no-framework"]
+        if self.settings.arch == "x86":
+            args += ["-platform macx-clang-32"]
 
         self.output.info("Using '%s' threads" % str(cpu_count()))
         self.run("cd %s && ./configure %s" % (self.source_dir, " ".join(args)))
