@@ -1,3 +1,6 @@
+"""
+PyLint is boring
+"""
 import os
 
 from distutils.spawn import find_executable
@@ -28,8 +31,9 @@ def which(program):
     return None
 
 class QtConan(ConanFile):
-    """ Qt Conan package """
-
+    """
+    Qt Conan package
+    """
     name = "Qt"
     version = "5.9.2"
     description = "Conan.io package for Qt library."

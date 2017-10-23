@@ -11,7 +11,7 @@ class QtTestConan(ConanFile):
     """ Qt Conan package test """
 
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "virtualenv"
 
     def build(self):
         cmake = CMake(self)
