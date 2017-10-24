@@ -18,13 +18,12 @@ class QtTestConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-
     def test(self):
         if self.settings.os == "Windows":
-            self.run("activate && %s %s" % (os.sep.join([".", "bin", "helloworld"]), "conan"))
-            self.run("activate && %s %s" % (os.sep.join([".", "bin", "helloworld2"]), "conan"))
-            #self.run("activate && %s %s" % (os.sep.join([".", "bin", "hellogui"]), "conan"))
+            self.run("activate && %s %s" % (os.sep.join([".", "bin", "test1"]), "conan"))
+            self.run("activate && %s %s" % (os.sep.join([".", "bin", "test2"]), "conan"))
+            #self.run("activate && %s %s" % (os.sep.join([".", "bin", "test3"]), "conan"))
         else:
-            self.run("%s %s" % (os.sep.join([".", "bin", "helloworld"]), "conan"))
-            self.run("%s %s" % (os.sep.join([".", "bin", "helloworld2"]), "conan"))
+            self.run("%s %s" % (os.sep.join([".", "bin", "test1"]), "conan"))
+            self.run("%s %s" % (os.sep.join([".", "bin", "test2"]), "conan"))
             #self.run("%s %s" % (os.sep.join([".", "bin", "hellogui"]), "conan"))
