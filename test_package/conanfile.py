@@ -20,7 +20,5 @@ class QtTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if self.settings.os == "Windows":
-            self.run("activate && ctest -C Release")
-        else:
-            self.run("ctest")
+        activate_cmd = "activate" if self.settings.os == "Windows" else "true"
+        self.run("{} && ctest -C Release".format(activate_cmd))
