@@ -16,6 +16,8 @@ set(CMAKE_AUTOMOC ON)
 set(AUTOMOC_MOC_OPTIONS PROPERTIES FOLDER CMakeAutomocTargets)
 set_property(GLOBAL PROPERTY AUTOMOC_FOLDER CMakeAutomocTargets)
 
+enable_testing()
+
 add_subdirectory(test1)
 add_subdirectory(test2)
 add_subdirectory(test3)

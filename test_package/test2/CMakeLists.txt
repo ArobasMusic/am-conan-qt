@@ -21,3 +21,10 @@ if(NOT MSVC)
             COMPILE_FLAGS "-fPIC"
     )
 endif()
+
+# CTest is a testing tool that can be used to test your project.
+add_test(
+    NAME CMake-Conan-Variables
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    COMMAND $<TARGET_FILE:${PROJECT_NAME}>
+)

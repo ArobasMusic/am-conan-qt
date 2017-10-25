@@ -7,7 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(AUTOMOC_MOC_OPTIONS PROPERTIES FOLDER CMakeAutomocTargets)
 set_property(GLOBAL PROPERTY AUTOMOC_FOLDER CMakeAutomocTargets)
 
-add_executable(${PROJECT_NAME} 
+add_executable(${PROJECT_NAME}
     main.cc
     mainwindow.cc
 )
@@ -20,3 +20,9 @@ target_link_libraries(${PROJECT_NAME}
         Qt5::Widgets
 )
 
+# CTest is a testing tool that can be used to test your project.
+add_test(
+    NAME Widgets
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    COMMAND $<TARGET_FILE:${PROJECT_NAME}>
+)

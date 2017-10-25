@@ -7,6 +7,7 @@ from conans import ConanFile, CMake
 CHANNEL = os.getenv("CONAN_CHANNEL", "stable")
 USERNAME = os.getenv("CONAN_USERNAME", "amusic")
 
+
 class QtTestConan(ConanFile):
     """ Qt Conan package test """
 
@@ -22,8 +23,9 @@ class QtTestConan(ConanFile):
         if self.settings.os == "Windows":
             self.run("activate && %s %s" % (os.sep.join([".", "bin", "test1"]), "conan"))
             self.run("activate && %s %s" % (os.sep.join([".", "bin", "test2"]), "conan"))
-            #self.run("activate && %s %s" % (os.sep.join([".", "bin", "test3"]), "conan"))
+            # self.run("activate && %s %s" % (os.sep.join([".", "bin", "test3"]), "conan"))
         else:
-            self.run("%s %s" % (os.sep.join([".", "bin", "test1"]), "conan"))
-            self.run("%s %s" % (os.sep.join([".", "bin", "test2"]), "conan"))
-            #self.run("%s %s" % (os.sep.join([".", "bin", "hellogui"]), "conan"))
+            self.run("ctest")
+            # self.run("%s %s" % (os.sep.join([".", "bin", "test1"]), "conan"))
+            # self.run("%s %s" % (os.sep.join([".", "bin", "test2"]), "conan"))
+            # self.run("%s %s" % (os.sep.join([".", "bin", "hellogui"]), "conan"))

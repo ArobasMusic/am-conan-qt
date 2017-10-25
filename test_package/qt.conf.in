@@ -1,2 +1,2 @@
 [Paths]
-Prefix = @CONAN_QTBASE_ROOT@
+Prefix = @CONAN_QT_ROOT@
