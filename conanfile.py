@@ -1,6 +1,3 @@
-"""
-PyLint is boring
-"""
 import os
 
 from distutils.spawn import find_executable
@@ -107,9 +104,6 @@ class QtConan(ConanFile):
             self.run("chmod +x ./%s/configure" % self.source_dir)
 
     def build(self):
-        """ Define your project building. You decide the way of building it
-            to reuse it later in any other project.
-        """
         args = [
             "-opensource",
             "-confirm-license",
@@ -119,6 +113,7 @@ class QtConan(ConanFile):
         ]
         if not self.options.shared:
             args.insert(0, "-static")
+
         if self.settings.build_type == "Debug":
             args.append("-debug")
         else:
