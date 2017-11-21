@@ -9,9 +9,6 @@ def which(program):
     Locate a command.
     """
     def is_exe(fpath):
-        """
-        Check if a path is executable.
-        """
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     fpath, _ = os.path.split(program)
@@ -28,9 +25,6 @@ def which(program):
     return None
 
 class QtConan(ConanFile):
-    """
-    Qt Conan package
-    """
     name = "Qt"
     version = "5.9.2"
     description = "Conan.io package for Qt library."
