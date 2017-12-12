@@ -97,9 +97,6 @@ class QtConan(ConanFile):
             self.run("chmod +x ./{}/configure".format(self.source_dir))
 
     def build(self):
-        """ Define your project building. You decide the way of building it to
-            reuse it later in any other project.
-        """
         args = [
             "-opensource",
             "-confirm-license",
@@ -107,14 +104,10 @@ class QtConan(ConanFile):
             "-nomake tests",
             "-prefix {}".format(self.package_folder)
         ]
-        if not self.options.shared:
-            args.insert(0, "-static")
-
         if self.settings.build_type == "Debug":
             args.append("-debug")
         else:
             args.append("-release")
-
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self._build_msvc(args)
         else:
@@ -128,7 +121,6 @@ class QtConan(ConanFile):
             build_command = "nmake.exe"
             build_args = []
         self.output.info("Using '{} {}' to build".format(build_command, " ".join(build_args)))
-
         env = {}
         env.update({'PATH': [
             "C:\\Perl64\\bin",
@@ -137,33 +129,22 @@ class QtConan(ConanFile):
             "{}\\gnuwin32\\bin".format(self.conanfile_directory),
             "{}\\qtrepotools\\bin".format(self.conanfile_directory)
         ]})
-
         # it seems not enough to set the vcvars for older versions
         if self.settings.compiler == "Visual Studio":
             if self.settings.compiler.version == "14":
                 args += ["-platform win32-msvc2015"]
-            if self.settings.compiler.version == "12":
-                args += ["-platform win32-msvc2013"]
-            if self.settings.compiler.version == "11":
-                args += ["-platform win32-msvc2012"]
-            if self.settings.compiler.version == "10":
-                args += ["-platform win32-msvc2010"]
-
         args += ["-opengl {}".format(self.options.opengl)]
         if self.options.opengl == "dynamic":
             args += ["-angle"]
             env.update({'QT_ANGLE_PLATFORM': 'd3d11'})
-
         if self.options.openssl == "no":
             args += ["-no-openssl"]
         elif self.options.openssl == "yes":
             args += ["-openssl"]
         else:
             args += ["-openssl-linked"]
-
         env_build = VisualStudioBuildEnvironment(self)
         env.update(env_build.vars)
-
         with tools.environment_append(env):
             vcvars = tools.vcvars_command(self.settings)
             self.run("cd {} && {} && set".format(self.source_dir, vcvars))
