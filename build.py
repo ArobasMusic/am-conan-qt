@@ -1,6 +1,6 @@
 from conan.packager import ConanMultiPackager
 
-def main():
+def build():
     """
     Main function.
     """
@@ -21,4 +21,4 @@ def main():
     builder.run()
 
 if __name__ == "__main__":
-    main()
+    build()
