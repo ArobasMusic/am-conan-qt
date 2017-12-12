@@ -1,11 +1,8 @@
-"""
-PyLint is boring
-"""
 import os
-
 from distutils.spawn import find_executable
 from conans import ConanFile, tools, VisualStudioBuildEnvironment
 from conans.tools import cpu_count
+
 
 def which(program):
     """
@@ -40,7 +37,6 @@ class QtConan(ConanFile):
     source_dir = "qt5"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "opengl": ["desktop", "dynamic"],
         "canvas3d": [True, False],
         "gamepad": [True, False],
@@ -55,7 +51,7 @@ class QtConan(ConanFile):
         "xmlpatterns": [True, False],
         "openssl": ["no", "yes", "linked"]
     }
-    default_options = "shared=True", "opengl=dynamic", "canvas3d=False", "gamepad=False", "graphicaleffects=False", "imageformats=False", "location=False", "serialport=False", "svg=False", "tools=False", "webengine=False", "websockets=False", "xmlpatterns=False", "openssl=no"
+    default_options = "opengl=dynamic", "canvas3d=False", "gamepad=False", "graphicaleffects=False", "imageformats=False", "location=False", "serialport=False", "svg=False", "tools=False", "webengine=False", "websockets=False", "xmlpatterns=False", "openssl=no"
     url = "https://github.com/ArobasMusic/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
@@ -99,23 +95,23 @@ class QtConan(ConanFile):
             submodules.append("qtxmlpatterns")
 
         self.run("git clone https://code.qt.io/qt/qt5.git")
-        self.run("cd %s && git checkout v%s" % (self.source_dir, self.version))
-        self.run("cd %s && perl init-repository --no-update --module-subset=%s" % (self.source_dir, ",".join(submodules)))
-        self.run("cd %s && git submodule update" % self.source_dir)
+        self.run("cd {} && git checkout v{}".format(self.source_dir, self.version))
+        self.run("cd {} && perl init-repository --no-update --module-subset={}".format(self.source_dir, ",".join(submodules)))
+        self.run("cd {} && git submodule update".format(self.source_dir))
 
         if self.settings.os != "Windows":
-            self.run("chmod +x ./%s/configure" % self.source_dir)
+            self.run("chmod +x ./{}/configure".format(self.source_dir))
 
     def build(self):
-        """ Define your project building. You decide the way of building it
-            to reuse it later in any other project.
+        """ Define your project building. You decide the way of building it to
+            reuse it later in any other project.
         """
         args = [
             "-opensource",
             "-confirm-license",
             "-nomake examples",
             "-nomake tests",
-            "-prefix %s" % self.package_folder
+            "-prefix {}".format(self.package_folder)
         ]
         if not self.options.shared:
             args.insert(0, "-static")
@@ -136,15 +132,15 @@ class QtConan(ConanFile):
         else:
             build_command = "nmake.exe"
             build_args = []
-        self.output.info("Using '%s %s' to build" % (build_command, " ".join(build_args)))
+        self.output.info("Using '{} {}' to build".format(build_command, " ".join(build_args)))
 
         env = {}
         env.update({'PATH': [
-            'C:\\Perl64\\bin',
-            'C:\\Program Files (x86)\\Windows Kits\\8.1\\bin\\x86',
-            '%s\\qtbase\\bin' % self.conanfile_directory,
-            '%s\\gnuwin32\\bin' % self.conanfile_directory,
-            '%s\\qtrepotools\\bin' % self.conanfile_directory
+            "C:\\Perl64\\bin",
+            "C:\\Program Files (x86)\\Windows Kits\\8.1\\bin\\x86",
+            "{}\\qtbase\\bin".format(self.conanfile_directory),
+            "{}\\gnuwin32\\bin".format(self.conanfile_directory),
+            "{}\\qtrepotools\\bin".format(self.conanfile_directory)
         ]})
 
         # it seems not enough to set the vcvars for older versions
@@ -158,7 +154,7 @@ class QtConan(ConanFile):
             if self.settings.compiler.version == "10":
                 args += ["-platform win32-msvc2010"]
 
-        args += ["-opengl %s" % self.options.opengl]
+        args += ["-opengl {}".format(self.options.opengl)]
         if self.options.opengl == "dynamic":
             args += ["-angle"]
             env.update({'QT_ANGLE_PLATFORM': 'd3d11'})
@@ -175,21 +171,19 @@ class QtConan(ConanFile):
 
         with tools.environment_append(env):
             vcvars = tools.vcvars_command(self.settings)
-
-            self.run("cd %s && %s && set" % (self.source_dir, vcvars))
-            self.run("cd %s && %s && configure %s" % (self.source_dir, vcvars, " ".join(args)))
-            self.run("cd %s && %s && %s %s" % (self.source_dir, vcvars, build_command, " ".join(build_args)))
-            self.run("cd %s && %s && %s install" % (self.source_dir, vcvars, build_command))
+            self.run("cd {} && {} && set".format(self.source_dir, vcvars))
+            self.run("cd {} && {} && configure {}".format(self.source_dir, vcvars, " ".join(args)))
+            self.run("cd {} && {} && {} {}".format(self.source_dir, vcvars, build_command, " ".join(build_args)))
+            self.run("cd {} && {} && {} install".format(self.source_dir, vcvars, build_command))
 
     def _build_unix(self, args):
         args += ["-silent", "-no-framework"]
         if self.settings.arch == "x86":
             args += ["-platform macx-clang-32"]
-
-        self.output.info("Using '%s' threads" % str(cpu_count()))
-        self.run("cd %s && ./configure %s" % (self.source_dir, " ".join(args)))
-        self.run("cd %s && make -j %s" % (self.source_dir, str(cpu_count())))
-        self.run("cd %s && make install" % (self.source_dir))
+        self.output.info("Using '{}' threads".format(cpu_count()))
+        self.run("cd {} && ./configure {}".format(self.source_dir, " ".join(args)))
+        self.run("cd {} && make -j {}".format(self.source_dir, cpu_count()))
+        self.run("cd {} && make install".format(self.source_dir))
 
     def package_info(self):
         libs = [
@@ -204,7 +198,6 @@ class QtConan(ConanFile):
             'Widgets',
             'Xml'
         ]
-
         self.cpp_info.libs = []
         self.cpp_info.includedirs = ["include"]
         for lib in libs:
@@ -214,9 +207,9 @@ class QtConan(ConanFile):
                 suffix = "_debug"
             else:
                 suffix = ""
-            self.cpp_info.libs += ["Qt5%s%s" % (lib, suffix)]
-            self.cpp_info.includedirs += ["include/Qt%s" % lib]
-
+            self.cpp_info.libs += ["Qt5{}{}".format(lib, suffix)]
+            self.cpp_info.includedirs += ["include/Qt{}".format(lib)]
         if self.settings.os == "Windows":
-            # Some missing shared libs inside QML and others, but for the test it works
+            # Some missing shared libs inside QML and others, but for the test
+            # it works
             self.env_info.path.append(os.path.join(self.package_folder, "bin"))
