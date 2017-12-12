@@ -2,6 +2,7 @@ import os
 from distutils.spawn import find_executable
 from conans import ConanFile, tools, VisualStudioBuildEnvironment
 from conans.tools import cpu_count
+from conans.model.version import Version
 
 
 def which(program):
@@ -160,6 +161,12 @@ class QtConan(ConanFile):
         self.run("cd {} && ./configure {}".format(self.source_dir, " ".join(args)))
         self.run("cd {} && make -j {}".format(self.source_dir, cpu_count()))
         self.run("cd {} && make install".format(self.source_dir))
+
+    def package_id(self):
+        if self.settings.compiler == "apple-clang":
+            compiler_version = Version(str(self.settings.compiler.version))
+            if compiler_version >= "7.0" and compiler_version <= "9.0":
+                self.info.settings.compiler.version = "apple-clang7.0-9.0"
 
     def package_info(self):
         libs = [
