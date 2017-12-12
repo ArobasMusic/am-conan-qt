@@ -46,7 +46,7 @@ class QtConan(ConanFile):
         "xmlpatterns": [True, False],
         "openssl": ["no", "yes", "linked"]
     }
-    default_options = "opengl=dynamic", "canvas3d=False", "gamepad=False", "graphicaleffects=False", "imageformats=False", "location=False", "serialport=False", "svg=False", "tools=False", "webengine=False", "websockets=False", "xmlpatterns=False", "openssl=no"
+    default_options = "canvas3d=False", "gamepad=False", "graphicaleffects=True", "imageformats=True", "location=True", "opengl=dynamic", "openssl=no", "serialport=False", "svg=True", "tools=False", "webengine=False", "websockets=False", "xmlpatterns=True"
     url = "https://github.com/ArobasMusic/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
