@@ -1,9 +1,6 @@
 from conan.packager import ConanMultiPackager
 
 def build():
-    """
-    Main function.
-    """
     builder = ConanMultiPackager(username="amusic", channel="stable")
     builder.add_common_builds()
     filtered_builds = []
@@ -12,11 +9,7 @@ def build():
             if settings["compiler.runtime"] == "MT" or settings["compiler.runtime"] == "MTd":
                 # Ignore MT runtime
                 continue
-        if settings["arch"] != "x86_64":
-            continue
-
         filtered_builds.append([settings, options, env_vars, build_requires])
-
     builder.builds = filtered_builds
     builder.run()
 
