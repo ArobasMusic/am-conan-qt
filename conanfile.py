@@ -33,20 +33,18 @@ class QtConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "opengl": ["desktop", "dynamic"],
+        "openssl": ["no", "yes", "linked"],
         "canvas3d": [True, False],
         "gamepad": [True, False],
         "graphicaleffects": [True, False],
-        "imageformats": [True, False],
         "location": [True, False],
         "serialport": [True, False],
-        "svg": [True, False],
         "tools": [True, False],
         "webengine": [True, False],
-        "websockets": [True, False],
-        "xmlpatterns": [True, False],
-        "openssl": ["no", "yes", "linked"]
+        "websockets": [True, False]
     }
-    default_options = "canvas3d=False", "gamepad=False", "graphicaleffects=True", "imageformats=True", "location=True", "opengl=dynamic", "openssl=no", "serialport=False", "svg=True", "tools=False", "webengine=False", "websockets=False", "xmlpatterns=True"
+    default_options = "canvas3d=False", "gamepad=False", "graphicaleffects=False", "location=False", "opengl=dynamic", "openssl=no", "serialport=False", "tools=False", "webengine=False", "websockets=False"
+
     url = "https://github.com/ArobasMusic/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
@@ -64,36 +62,17 @@ class QtConan(ConanFile):
                 self.requires("OpenSSL/1.0.2l@conan/stable")
 
     def source(self):
-        submodules = ["qtbase"]
-
-        if self.options.canvas3d:
-            submodules.append("qtcanvas3d")
-        if self.options.gamepad:
-            submodules.append("qtgamepad")
-        if self.options.graphicaleffects:
-            submodules.append("qtgraphicaleffects")
-        if self.options.imageformats:
-            submodules.append("qtimageformats")
-        if self.options.location:
-            submodules.append("qtlocation")
-        if self.options.serialport:
-            submodules.append("qtserialport")
-        if self.options.svg:
-            submodules.append("qtsvg")
-        if self.options.tools:
-            submodules.append("qttools")
-        if self.options.webengine:
-            submodules.append("qtwebengine")
-        if self.options.websockets:
-            submodules.append("qtwebsockets")
-        if self.options.xmlpatterns:
-            submodules.append("qtxmlpatterns")
-
+        submodules = ["qtbase", "qtimageformats", "qtsvg", "qtxmlpatterns"]
+        print
+        for module in ["canvas3d", "gamepad", "graphicaleffects", "location", "serialport", "tools", "webengine", "websockets"]:
+            option = self.options[module]
+            print "{}: {}".format(module, option.value)
+            if option.value:
+                submodules.append("qt{}".format(module))
         self.run("git clone https://code.qt.io/qt/qt5.git")
         self.run("cd {} && git checkout v{}".format(self.source_dir, self.version))
         self.run("cd {} && perl init-repository --no-update --module-subset={}".format(self.source_dir, ",".join(submodules)))
         self.run("cd {} && git submodule update".format(self.source_dir))
-
         if self.settings.os != "Windows":
             self.run("chmod +x ./{}/configure".format(self.source_dir))
 
@@ -164,8 +143,8 @@ class QtConan(ConanFile):
 
     def package_id(self):
         if self.settings.compiler == "apple-clang":
-            compiler_version = Version(str(self.settings.compiler.version))
-            if compiler_version >= "7.0" and compiler_version <= "9.0":
+            clang_version = Version(str(self.settings.compiler.version))
+            if clang_version >= "7.0" and clang_version <= "9.0":
                 self.info.settings.compiler.version = "apple-clang7.0-9.0"
 
     def package_info(self):
