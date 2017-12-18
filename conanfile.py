@@ -66,7 +66,6 @@ class QtConan(ConanFile):
         print
         for module in ["canvas3d", "gamepad", "graphicaleffects", "location", "serialport", "tools", "webengine", "websockets"]:
             option = self.options[module]
-            print "{}: {}".format(module, option.value)
             if option.value:
                 submodules.append("qt{}".format(module))
         self.run("git clone https://code.qt.io/qt/qt5.git")
