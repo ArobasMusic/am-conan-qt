@@ -27,7 +27,7 @@ def which(program):
 
 class QtConan(ConanFile):
     name = "Qt"
-    version = "5.9.2"
+    version = "5.9.3"
     description = "Conan.io package for Qt library."
     source_dir = "qt5"
     settings = "os", "arch", "compiler", "build_type"
@@ -132,7 +132,7 @@ class QtConan(ConanFile):
             self.run("cd {} && {} && {} install".format(self.source_dir, vcvars, build_command))
 
     def _build_unix(self, args):
-        args += ["-silent", "-no-framework"]
+        args += ["-silent"]
         if self.settings.arch == "x86":
             args += ["-platform macx-clang-32"]
         self.output.info("Using '{}' threads".format(cpu_count()))

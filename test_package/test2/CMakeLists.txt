@@ -1,5 +1,7 @@
 project(test2)
 
+message("-- CONAN_LIBS: ${CONAN_LIBS}")
+
 add_executable(${PROJECT_NAME} main.cc)
 target_compile_features(${PROJECT_NAME}
     PRIVATE
@@ -11,7 +13,7 @@ target_include_directories(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-        ${CONAN_LIBS}
+        Qt5::Core
 )
 
 if(NOT MSVC)
