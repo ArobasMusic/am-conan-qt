@@ -84,7 +84,10 @@ class QtConan(ConanFile):
             "-prefix {}".format(self.package_folder)
         ]
         if self.settings.build_type == "Debug":
-            args.append("-debug")
+            if self.settings.os == "Windows":
+                args.append("-debug")
+            else:
+                args.append("-debug-and-release")
         else:
             args.append("-release")
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
