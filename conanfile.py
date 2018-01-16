@@ -62,8 +62,11 @@ class QtConan(ConanFile):
                 self.requires("OpenSSL/1.0.2l@conan/stable")
 
     def source(self):
-        submodules = ["qtbase", "qtimageformats", "qtsvg", "qtxmlpatterns"]
-        print
+        submodules = ["qtbase", "qtconnectivity", "qtimageformats", "qtmultimedia", "qtsvg", "qttools", "qtxmlpatterns"]
+        if self.settings.os == "Windows":
+            submodules.append("qtwinextras")
+        else:
+            submodules.append("qtmacextras")
         for module in ["canvas3d", "gamepad", "graphicaleffects", "location", "serialport", "tools", "webengine", "websockets"]:
             option = self.options[module]
             if option.value:
