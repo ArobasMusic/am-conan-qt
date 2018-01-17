@@ -110,9 +110,9 @@ class QtConan(ConanFile):
         env.update({'PATH': [
             "C:\\Perl64\\bin",
             "C:\\Program Files (x86)\\Windows Kits\\8.1\\bin\\x86",
-            "{}\\qtbase\\bin".format(self.conanfile_directory),
-            "{}\\gnuwin32\\bin".format(self.conanfile_directory),
-            "{}\\qtrepotools\\bin".format(self.conanfile_directory)
+            "{}\\qtbase\\bin".format(self.build_folder),
+            "{}\\gnuwin32\\bin".format(self.build_folder),
+            "{}\\qtrepotools\\bin".format(self.build_folder)
         ]})
         # it seems not enough to set the vcvars for older versions
         if self.settings.compiler == "Visual Studio":
