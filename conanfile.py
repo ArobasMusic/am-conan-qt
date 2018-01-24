@@ -5,26 +5,6 @@ from conans.tools import cpu_count
 from conans.model.version import Version
 
 
-def which(program):
-    """
-    Locate a command.
-    """
-    def is_exe(fpath):
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-
-    fpath, _ = os.path.split(program)
-    if fpath:
-        if is_exe(program):
-            return program
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            path = path.strip('"')
-            exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
-                return exe_file
-
-    return None
-
 class QtConan(ConanFile):
     name = "Qt"
     version = "5.9.3"
@@ -177,6 +157,4 @@ class QtConan(ConanFile):
             self.cpp_info.libs += ["Qt5{}{}".format(lib, suffix)]
             self.cpp_info.includedirs += ["include/Qt{}".format(lib)]
         if self.settings.os == "Windows":
-            # Some missing shared libs inside QML and others, but for the test
-            # it works
             self.env_info.path.append(os.path.join(self.package_folder, "bin"))
