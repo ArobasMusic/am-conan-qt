@@ -29,7 +29,7 @@ pipeline {
                         label 'Windows&&vs14'
                     }
                     environment {
-                        CONAN_ARCHS = 'x86,x86_64'
+                        CONAN_ARCHS = 'x86'
                         CONAN_VISUAL_VERSIONS='14'
                         CONAN_VISUAL_RUNTIMES='MD,MDd'
                     }
