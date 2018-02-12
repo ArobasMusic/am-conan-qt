@@ -126,6 +126,10 @@ class QtConan(ConanFile):
         self.run("cd {} && make -j {}".format(self.source_dir, cpu_count()))
         self.run("cd {} && make install".format(self.source_dir))
 
+    def package(self):
+        if self.settings.build_type == "Debug":
+            self.copy("*", dst="src", src=os.path.join(self.source_folder, self.source_dir))
+
     def package_id(self):
         if self.settings.compiler == "apple-clang":
             clang_version = Version(str(self.settings.compiler.version))
