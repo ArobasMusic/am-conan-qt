@@ -133,8 +133,8 @@ class QtConan(ConanFile):
     def package_id(self):
         if self.settings.compiler == "apple-clang":
             clang_version = Version(str(self.settings.compiler.version))
-            if clang_version >= "7.0" and clang_version <= "9.0":
-                self.info.settings.compiler.version = "apple-clang7.0-9.0"
+            if clang_version >= "7.0":
+                self.info.settings.compiler.version = "apple-clang7"
 
     def package_info(self):
         libs = [
