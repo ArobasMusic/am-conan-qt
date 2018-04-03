@@ -21,7 +21,10 @@ pipeline {
                         CONAN_ARCHS = 'x86_64'
                     }
                     steps {
-                        sh 'python3 $PWD/build.py'
+                        sh '''
+                            conan remove "*" -f
+                            python3 $PWD/build.py
+                        '''
                     }
                 }
                 stage('Windows') {
@@ -34,7 +37,10 @@ pipeline {
                         CONAN_VISUAL_RUNTIMES='MD,MDd'
                     }
                     steps {
-                        sh 'python $PWD/build.py'
+                        sh '''
+                            conan remove "*" -f
+                            python $PWD/build.py
+                        '''
                     }
                 }
             }
