@@ -6,7 +6,7 @@ from conans.tools import cpu_count
 
 class QtConan(ConanFile):
     name = "Qt"
-    version = "5.9.3"
+    version = "5.9.6"
     description = "Conan.io package for Qt library."
     source_dir = "qt5"
     settings = "os", "arch", "compiler", "build_type"
