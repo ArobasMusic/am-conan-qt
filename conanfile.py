@@ -2,7 +2,6 @@ import os
 from distutils.spawn import find_executable
 from conans import ConanFile, tools, VisualStudioBuildEnvironment
 from conans.tools import cpu_count
-from conans.model.version import Version
 
 
 class QtConan(ConanFile):
@@ -24,7 +23,6 @@ class QtConan(ConanFile):
         "websockets": [True, False]
     }
     default_options = "canvas3d=False", "gamepad=False", "graphicaleffects=False", "location=False", "opengl=dynamic", "openssl=no", "serialport=False", "tools=False", "webengine=False", "websockets=False"
-
     url = "https://github.com/ArobasMusic/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
@@ -129,12 +127,6 @@ class QtConan(ConanFile):
     def package(self):
         if self.settings.build_type == "Debug":
             self.copy("*", dst="src", src=os.path.join(self.source_folder, self.source_dir))
-
-    def package_id(self):
-        if self.settings.compiler == "apple-clang":
-            clang_version = Version(str(self.settings.compiler.version))
-            if clang_version >= "7.0":
-                self.info.settings.compiler.version = "apple-clang7"
 
     def package_info(self):
         libs = [
