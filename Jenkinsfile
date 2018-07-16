@@ -8,7 +8,7 @@ pipeline {
             parallel {
                 stage('macOS') {
                     agent {
-                        label 'macOS'
+                        label 'macOS-10.13&&clang-9.1'
                     }
                     environment {
                         CONAN_ARCHS = 'x86_64'
