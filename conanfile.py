@@ -11,18 +11,19 @@ class QtConan(ConanFile):
     source_dir = "qt5"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "opengl": ["desktop", "dynamic"],
-        "openssl": ["no", "yes", "linked"],
         "canvas3d": [True, False],
+        "framework": [True, False],
         "gamepad": [True, False],
         "graphicaleffects": [True, False],
         "location": [True, False],
+        "opengl": ["desktop", "dynamic"],
+        "openssl": ["no", "yes", "linked"],
         "serialport": [True, False],
         "tools": [True, False],
         "webengine": [True, False],
-        "websockets": [True, False]
+        "websockets": [True, False],
     }
-    default_options = "canvas3d=False", "gamepad=False", "graphicaleffects=False", "location=False", "opengl=dynamic", "openssl=no", "serialport=False", "tools=False", "webengine=False", "websockets=False"
+    default_options = "canvas3d=False", "framework=False", "gamepad=False", "graphicaleffects=False", "location=False", "opengl=dynamic", "openssl=no", "serialport=False", "tools=False", "webengine=False", "websockets=False"
     url = "https://github.com/ArobasMusic/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
@@ -31,6 +32,8 @@ class QtConan(ConanFile):
         if self.settings.os != "Windows":
             del self.options.opengl
             del self.options.openssl
+        else:
+            del self.options.framework
 
     def requirements(self):
         if self.settings.os == "Windows":
@@ -74,7 +77,7 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self._build_msvc(args)
         else:
-            self._build_unix(args)
+            self._build_macos(args)
 
     def _build_msvc(self, args):
         build_command = find_executable("jom.exe")
@@ -115,8 +118,9 @@ class QtConan(ConanFile):
             self.run("cd {} && {} && {} {}".format(self.source_dir, vcvars, build_command, " ".join(build_args)))
             self.run("cd {} && {} && {} install".format(self.source_dir, vcvars, build_command))
 
-    def _build_unix(self, args):
+    def _build_macos(self, args):
         args += ["-silent"]
+        args += ["-framework" if self.options.framework else "-no-framework"]
         if self.settings.arch == "x86":
             args += ["-platform macx-clang-32"]
         self.output.info("Using '{}' threads".format(cpu_count()))
