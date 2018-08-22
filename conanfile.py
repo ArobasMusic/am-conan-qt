@@ -28,6 +28,9 @@ class QtConan(ConanFile):
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
 
+    def configure(self):
+        del self.settings.build_type
+
     def config_options(self):
         if self.settings.os != "Windows":
             del self.options.opengl
@@ -61,19 +64,13 @@ class QtConan(ConanFile):
 
     def build(self):
         args = [
+            "-debug-and-release",
             "-opensource",
             "-confirm-license",
             "-nomake examples",
             "-nomake tests",
             "-prefix {}".format(self.package_folder)
         ]
-        if self.settings.build_type == "Debug":
-            if self.settings.os == "Windows":
-                args.append("-debug")
-            else:
-                args.append("-debug-and-release")
-        else:
-            args.append("-release")
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self._build_msvc(args)
         else:
@@ -129,32 +126,4 @@ class QtConan(ConanFile):
         self.run("cd {} && make install".format(self.source_dir))
 
     def package(self):
-        if self.settings.build_type == "Debug":
-            self.copy("*", dst="src", src=os.path.join(self.source_folder, self.source_dir))
-
-    def package_info(self):
-        libs = [
-            'Concurrent',
-            'Core',
-            'DBus',
-            'Gui',
-            'Network',
-            'OpenGL',
-            'Sql',
-            'Test',
-            'Widgets',
-            'Xml'
-        ]
-        self.cpp_info.libs = []
-        self.cpp_info.includedirs = ["include"]
-        for lib in libs:
-            if self.settings.os == "Windows" and self.settings.build_type == "Debug":
-                suffix = "d"
-            elif self.settings.os == "Macos" and self.settings.build_type == "Debug":
-                suffix = "_debug"
-            else:
-                suffix = ""
-            self.cpp_info.libs += ["Qt5{}{}".format(lib, suffix)]
-            self.cpp_info.includedirs += ["include/Qt{}".format(lib)]
-        if self.settings.os == "Windows":
-            self.env_info.path.append(os.path.join(self.package_folder, "bin"))
+        self.copy("*", dst="src", src=os.path.join(self.source_folder, self.source_dir))
