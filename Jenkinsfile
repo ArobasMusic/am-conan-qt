@@ -2,6 +2,9 @@ pipeline {
     agent {
         label 'master'
     }
+    environment {
+        CONAN_BUILD_TYPES = 'Release'
+    }
     stages {
         stage('Build') {
             failFast true

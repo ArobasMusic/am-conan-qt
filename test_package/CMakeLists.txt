@@ -18,6 +18,13 @@ set_property(GLOBAL PROPERTY AUTOMOC_FOLDER CMakeAutomocTargets)
 
 enable_testing()
 
+if(WIN32)
+    file(TO_NATIVE_PATH ${CONAN_BIN_DIRS_QT} QT_BIN_DIRS)
+    set(CONAN_QT_PKG_TEST_ENV "PATH=${QT_BIN_DIRS}")
+else()
+    set(CONAN_QT_PKG_TEST_ENV "DYLD_LIBRARY_PATH=${CONAN_LIB_DIRS_QT}")
+endif()
+
 add_subdirectory(test1)
 add_subdirectory(test2)
 # add_subdirectory(test3)

@@ -1,7 +1,5 @@
 project(test2)
 
-message("-- CONAN_LIBS: ${CONAN_LIBS}")
-
 add_executable(${PROJECT_NAME} main.cc)
 target_compile_features(${PROJECT_NAME}
     PRIVATE
@@ -28,5 +26,5 @@ endif()
 add_test(
     NAME CMake-Conan-Variables
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-    COMMAND $<TARGET_FILE:${PROJECT_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E env "${CONAN_QT_PKG_TEST_ENV}" $<TARGET_FILE:${PROJECT_NAME}>
 )
