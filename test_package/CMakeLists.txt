@@ -18,6 +18,12 @@ set_property(GLOBAL PROPERTY AUTOMOC_FOLDER CMakeAutomocTargets)
 
 enable_testing()
 
+if(WIN32)
+    file(TO_NATIVE_PATH ${CONAN_BIN_DIRS_QT} QT_LIB_DIR)
+else()
+    set(QT_LIB_DIR CONAN_LIB_DIRS_QT)
+endif()
+
 add_subdirectory(test1)
 add_subdirectory(test2)
 # add_subdirectory(test3)

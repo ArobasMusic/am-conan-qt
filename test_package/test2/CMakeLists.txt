@@ -1,7 +1,5 @@
 project(test2)
 
-message("-- CONAN_LIBS: ${CONAN_LIBS}")
-
 add_executable(${PROJECT_NAME} main.cc)
 target_compile_features(${PROJECT_NAME}
     PRIVATE
@@ -27,6 +25,6 @@ endif()
 # CTest is a testing tool that can be used to test your project.
 add_test(
     NAME CMake-Conan-Variables
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    WORKING_DIRECTORY ${QT_LIB_DIR}
     COMMAND $<TARGET_FILE:${PROJECT_NAME}>
 )
