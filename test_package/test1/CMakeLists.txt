@@ -25,6 +25,6 @@ endif()
 # CTest is a testing tool that can be used to test your project.
 add_test(
     NAME CMake-Qt-Target
-    WORKING_DIRECTORY ${QT_LIB_DIR}
-    COMMAND $<TARGET_FILE:${PROJECT_NAME}>
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    COMMAND ${CMAKE_COMMAND} -E env "${CONAN_QT_PKG_TEST_ENV}" $<TARGET_FILE:${PROJECT_NAME}>
 )
