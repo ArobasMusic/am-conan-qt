@@ -1,8 +1,11 @@
-from conans.client.loader_parse import load_conanfile_class as ConanFile
 from conan.packager import ConanMultiPackager
 
+from conans.client.loader import ConanFileLoader
+from conans.client.graph.python_requires import ConanPythonRequire
+
 def build():
-    conanfile = ConanFile('./conanfile.py')
+    loader = ConanFileLoader(None, None, ConanPythonRequire(None, None))
+    conanfile = loader.load_class('./conanfile.py')
     builder = ConanMultiPackager(
         reference="{}/{}".format(conanfile.name, conanfile.version),
         username="amusic",
