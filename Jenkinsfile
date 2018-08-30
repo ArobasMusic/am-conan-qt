@@ -4,7 +4,7 @@ pipeline {
     }
     environment {
         CONAN_BUILD_TYPES = 'Release'
-        CONAN_UPLOAD = 'https://api.bintray.com/conan/arobasmusic/conan-public@True@arobasmusic_public'
+        CONAN_UPLOAD = 'https://api.bintray.com/conan/arobasmusic/public-conan@True@arobasmusic_public'
     }
     stages {
         stage('Build') {
