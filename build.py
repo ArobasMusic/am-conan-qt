@@ -8,7 +8,7 @@ def build():
     conanfile = loader.load_class('./conanfile.py')
     builder = ConanMultiPackager(
         reference="{}/{}".format(conanfile.name, conanfile.version),
-        username="amusic",
+        username="arobasmusic",
     )
     builder.add_common_builds()
     builder.run()
