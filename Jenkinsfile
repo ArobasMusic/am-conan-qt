@@ -4,7 +4,6 @@ pipeline {
     }
     environment {
         CONAN_BUILD_TYPES = 'Release'
-        CONAN_UPLOAD = ''
     }
     stages {
         stage('Build') {
