@@ -33,6 +33,9 @@ class QtConan(ConanFile):
         del self.settings.build_type
         if self.settings.os == "Windows":
             del self.settings.compiler.runtime
+            if self.options.openssl in ["yes", "linked"]:
+             self.options["OpenSSL"].no_zlib = True
+             self.options["OpenSSL"].shared = True
 
     def config_options(self):
         if self.settings.os != "Windows":
