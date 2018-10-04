@@ -23,7 +23,7 @@ class QtConan(ConanFile):
         "webengine": [True, False],
         "websockets": [True, False],
     }
-    exports = ["LICENSE.md"]
+    exports = ["LICENSE.md", "qtconf.py"]
     default_options = "canvas3d=False", "framework=False", "gamepad=False", "graphicaleffects=False", "location=False", "opengl=dynamic", "openssl=no", "serialport=False", "tools=False", "webengine=False", "websockets=False"
     url = "https://github.com/ArobasMusic/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
