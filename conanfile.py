@@ -1,12 +1,12 @@
 import os
+import qtconf
 from distutils.spawn import find_executable
 from conans import ConanFile, tools, VisualStudioBuildEnvironment
 from conans.tools import cpu_count
 
-
 class QtConan(ConanFile):
     name = "Qt"
-    version = "5.9.6"
+    version = qtconf.version
     description = "Conan.io package for Qt library."
     source_dir = "qt5"
     settings = "os", "arch", "compiler", "build_type"
@@ -23,7 +23,7 @@ class QtConan(ConanFile):
         "webengine": [True, False],
         "websockets": [True, False],
     }
-    exports = ["LICENSE.md"]
+    exports = ["LICENSE.md", "qtconf.py"]
     default_options = "canvas3d=False", "framework=False", "gamepad=False", "graphicaleffects=False", "location=False", "opengl=dynamic", "openssl=no", "serialport=False", "tools=False", "webengine=False", "websockets=False"
     url = "https://github.com/ArobasMusic/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
@@ -33,6 +33,9 @@ class QtConan(ConanFile):
         del self.settings.build_type
         if self.settings.os == "Windows":
             del self.settings.compiler.runtime
+            if self.options.openssl in ["yes", "linked"]:
+             self.options["OpenSSL"].no_zlib = True
+             self.options["OpenSSL"].shared = True
 
     def config_options(self):
         if self.settings.os != "Windows":
@@ -44,7 +47,7 @@ class QtConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Windows":
             if self.options.openssl == "yes":
-                self.requires("OpenSSL/1.0.2l@conan/stable", dev=True)
+                self.build_requires("OpenSSL/1.0.2l@conan/stable")
             elif self.options.openssl == "linked":
                 self.requires("OpenSSL/1.0.2l@conan/stable")
 
@@ -59,7 +62,7 @@ class QtConan(ConanFile):
             if option.value:
                 submodules.append("qt{}".format(module))
         self.run("git clone https://code.qt.io/qt/qt5.git")
-        self.run("cd {} && git checkout v{}".format(self.source_dir, self.version))
+        self.run("cd {} && git checkout {}".format(self.source_dir, qtconf.branch))
         self.run("cd {} && perl init-repository --no-update --module-subset={}".format(self.source_dir, ",".join(submodules)))
         self.run("cd {} && git submodule update".format(self.source_dir))
         if self.settings.os != "Windows":
