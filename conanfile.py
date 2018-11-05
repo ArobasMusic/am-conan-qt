@@ -78,6 +78,9 @@ class QtConan(ConanFile):
             "-confirm-license",
             "-nomake examples",
             "-nomake tests",
+            "-no-sql-mysql",
+            "-force-debug-info",
+            "-separate-debug-info",
             "-prefix {}".format(self.package_folder)
         ]
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
@@ -115,6 +118,7 @@ class QtConan(ConanFile):
             args += ["-openssl"]
         else:
             args += ["-openssl-linked"]
+        args += ["-direct2d"]
         env_build = VisualStudioBuildEnvironment(self)
         env.update(env_build.vars)
         with tools.environment_append(env):
