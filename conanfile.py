@@ -1,8 +1,10 @@
 import os
-import qtconf
+
 from distutils.spawn import find_executable
 from conans import ConanFile, tools, VisualStudioBuildEnvironment
 from conans.tools import cpu_count
+
+import qtconf
 
 class QtConan(ConanFile):
     name = "Qt"
@@ -28,6 +30,10 @@ class QtConan(ConanFile):
     url = "https://github.com/ArobasMusic/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
+
+    @property
+    def build_dir(self):
+        return os.path.join(self.build_folder, "qt5")
 
     def configure(self):
         del self.settings.build_type
@@ -123,10 +129,9 @@ class QtConan(ConanFile):
         env.update(env_build.vars)
         with tools.environment_append(env):
             vcvars = tools.vcvars_command(self.settings)
-            self.run("cd {} && {} && set".format(self.source_dir, vcvars))
-            self.run("cd {} && {} && configure {}".format(self.source_dir, vcvars, " ".join(args)))
-            self.run("cd {} && {} && {} {}".format(self.source_dir, vcvars, build_command, " ".join(build_args)))
-            self.run("cd {} && {} && {} install".format(self.source_dir, vcvars, build_command))
+            self.run("{} && configure {}".format(vcvars, " ".join(args)), cwd=self.build_dir)
+            self.run("{} && {} {}".format(vcvars, build_command, " ".join(build_args)), cwd=self.build_dir)
+            self.run("{} && {} install".format(vcvars, build_command), cwd=self.build_dir)
 
     def _build_macos(self, args):
         args += ["-silent"]
@@ -134,9 +139,9 @@ class QtConan(ConanFile):
         if self.settings.arch == "x86":
             args += ["-platform macx-clang-32"]
         self.output.info("Using '{}' threads".format(cpu_count()))
-        self.run("cd {} && ./configure {}".format(self.source_dir, " ".join(args)))
-        self.run("cd {} && make -j {}".format(self.source_dir, cpu_count()))
-        self.run("cd {} && make install".format(self.source_dir))
+        self.run("./configure {}".format(" ".join(args)), cwd=self.build_dir)
+        self.run("make -j {}".format(cpu_count()), cwd=self.build_dir)
+        self.run("make install", cwd=self.build_dir)
 
     def package(self):
         self.copy("*", dst="src", src=os.path.join(self.source_folder, self.source_dir))
