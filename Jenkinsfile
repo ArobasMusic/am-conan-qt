@@ -27,9 +27,6 @@ pipeline {
                     agent {
                         label 'Windows&&vs14'
                     }
-                    environment {
-                        CONAN_ARCHS = 'x86'
-                    }
                     steps {
                         sh '''
                             conan remove "*" -f

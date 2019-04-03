@@ -31,7 +31,7 @@ def get_remote(conan_api):
     return (remote_name,user,password)
 
 def get_archs():
-    return map(lambda s: s.strip(), os.environ['CONAN_ARCHS'].split(','))
+    return map(lambda s: s.strip(), os.getenv('CONAN_ARCHS', 'x86,x86_64').split(','))
 
 def get_compiler():
     platform_os = platform.system()
