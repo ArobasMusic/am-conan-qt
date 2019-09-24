@@ -15,6 +15,7 @@ class QtConan(ConanFile):
     options = {
         "canvas3d": [True, False],
         "framework": [True, False],
+        "connectivity": [True, False],
         "gamepad": [True, False],
         "graphicaleffects": [True, False],
         "location": [True, False],
@@ -66,7 +67,7 @@ class QtConan(ConanFile):
             submodules.append("qtwinextras")
         else:
             submodules.append("qtmacextras")
-        for module in ["qtconnectivity", "canvas3d", "gamepad", "graphicaleffects", "location", "serialport", "tools", "webengine", "websockets"]:
+        for module in ["connectivity", "canvas3d", "gamepad", "graphicaleffects", "location", "serialport", "tools", "webengine", "websockets"]:
             option = self.options[module]
             if option.value:
                 submodules.append("qt{}".format(module))
