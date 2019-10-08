@@ -54,12 +54,12 @@ class QtConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == "Windows":
             if self.options.openssl == "yes":
-                self.build_requires("OpenSSL/1.0.2l@conan/stable")
+                self.build_requires("OpenSSL/1.0.2m@conan/stable")
 
     def requirements(self):
         if self.settings.os == "Windows":
             if self.options.openssl == "linked":
-                self.requires("OpenSSL/1.0.2l@conan/stable")
+                self.requires("OpenSSL/1.0.2m@conan/stable")
 
     def source(self):
         submodules = ["qtbase", "qtimageformats", "qtmultimedia", "qtsvg", "qttools", "qttranslations", "qtxmlpatterns"]
