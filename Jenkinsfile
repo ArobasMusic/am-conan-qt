@@ -13,7 +13,7 @@ pipeline {
             parallel {
                 stage('macOS') {
                     agent {
-                        label 'macOS-10.13&&clang-9.1'
+                        label 'macOS-10.14'
                     }
                     steps {
                         sh '''
@@ -24,7 +24,7 @@ pipeline {
                 }
                 stage('Windows') {
                     agent {
-                        label 'Windows&&vs19'
+                        label 'Windows&&vs16'
                     }
                     steps {
                         sh '''
