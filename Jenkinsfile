@@ -5,6 +5,7 @@ pipeline {
     environment {
         CONAN_BUILD_TYPES = 'Release'
         CONAN_ARCHS = 'x86_64'
+        CONAN_STABLE_BRANCH_PATTERN = 'release/*'
     }
     stages {
         stage('Build') {
@@ -12,7 +13,7 @@ pipeline {
             parallel {
                 stage('macOS') {
                     agent {
-                        label 'macOS-10.13&&clang-9.1'
+                        label 'macOS&&clang-11.0'
                     }
                     steps {
                         sh '''
