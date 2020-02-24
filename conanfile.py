@@ -72,7 +72,7 @@ class QtConan(ConanFile):
             if option.value:
                 submodules.append("qt{}".format(module))
         self.run("git clone https://code.qt.io/qt/qt5.git")
-        self.run("cd {} && git checkout {}".format(self.source_dir, qtconf.branch))
+        self.run("cd {} && git checkout v{}".format(self.source_dir, qtconf.branch))
         self.run("cd {} && perl init-repository --no-update --module-subset={}".format(self.source_dir, ",".join(submodules)))
         self.run("cd {} && git submodule update".format(self.source_dir))
         if self.settings.os != "Windows":
