@@ -3,7 +3,7 @@ pipeline {
         label 'master'
     }
     environment {
-        CONAN_STABLE_BRANCH_PATTERN = 'master'
+        CONAN_STABLE_BRANCH_PATTERN = 'release/*'
         CONAN_BUILD_TYPES = 'Release'
         CONAN_ARCHS = 'x86_64'
     }
