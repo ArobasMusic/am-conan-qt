@@ -60,5 +60,8 @@ target/
 .history/
 .vscode/
 
+# masOS .DS_Store
+.DS_Store
+
 # Local test script
 run.sh
