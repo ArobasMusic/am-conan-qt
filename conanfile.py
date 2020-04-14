@@ -8,7 +8,7 @@ import qtconf
 
 class QtConan(ConanFile):
     name = "Qt"
-    version = qtconf.version
+    version = qtconf.PKG_VERSION
     description = "Conan.io package for Qt library."
     source_dir = "qt5"
     settings = "os", "arch", "compiler", "build_type"
@@ -72,7 +72,7 @@ class QtConan(ConanFile):
             if option.value:
                 submodules.append("qt{}".format(module))
         self.run("git clone https://code.qt.io/qt/qt5.git")
-        self.run("cd {} && git checkout {}".format(self.source_dir, qtconf.branch))
+        self.run("cd {} && git checkout {}".format(self.source_dir, qtconf.BRANCH))
         self.run("cd {} && perl init-repository --no-update --module-subset={}".format(self.source_dir, ",".join(submodules)))
         self.run("cd {} && git submodule update".format(self.source_dir))
         if self.settings.os != "Windows":

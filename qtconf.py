@@ -1,4 +1,6 @@
 import os
 
-version = "5.12.5-{}".format(os.getenv('BUILD_NUMBER', '0'))
-branch = "v5.12.5"
+QT_VERSION = "5.12.8"
+
+BRANCH = "v{}".format(QT_VERSION)
+PKG_VERSION = "{}-{}".format(QT_VERSION, os.getenv('BUILD_NUMBER', '0'))
