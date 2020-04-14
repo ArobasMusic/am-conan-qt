@@ -38,6 +38,8 @@ class QtConan(ConanFile):
 
     def configure(self):
         del self.settings.build_type
+        if self.settings.arch == "x86":
+            raise Exception("Unsupported architecture 'x86'")
         if self.settings.os == "Windows":
             del self.settings.compiler.runtime
             if self.options.openssl in ["yes", "linked"]:
@@ -135,10 +137,12 @@ class QtConan(ConanFile):
             self.run("{} && {} install".format(vcvars, build_command), cwd=self.build_dir)
 
     def _build_macos(self, args):
+        os_version = self.settings.get_safe('os.version')
+
         args += ["-silent"]
         args += ["-framework" if self.options.framework else "-no-framework"]
-        if self.settings.arch == "x86":
-            args += ["-platform macx-clang-32"]
+        args += ["-platform macx-clang"]
+        args += ["QMAKE_MACOSX_DEPLOYMENT_TARGET={}".format(os_version if os_version else "10.12")]
         self.output.info("Using '{}' threads".format(cpu_count()))
         self.run("./configure {}".format(" ".join(args)), cwd=self.build_dir)
         self.run("make -j {}".format(cpu_count()), cwd=self.build_dir)
