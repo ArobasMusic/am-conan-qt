@@ -1,11 +1,11 @@
 import os
 import platform
-import re
+
+from fnmatch import fnmatch
 
 from conans.client.conan_api import Conan
-from conans.client.loader import ConanFileLoader
 from conans.client.graph.python_requires import ConanPythonRequire
-
+from conans.client.loader import parse_conanfile
 
 def default(col, index, fallback):
     try:
@@ -25,10 +25,10 @@ def get_remote(conan_api):
 
     for registered_remote in conan_api.remote_list():
         if registered_remote.name == remote_name and registered_remote.url == remote_url:
-            return (remote_name,user,password)
+            return (remote_name, user, password)
 
     conan_api.remote_add(remote_name, remote_url, remote_verify_ssl)
-    return (remote_name,user,password)
+    return (remote_name, user, password)
 
 def get_archs():
     return map(lambda s: s.strip(), os.getenv('CONAN_ARCHS', 'x86,x86_64').split(','))
@@ -51,7 +51,8 @@ def get_compiler_versions():
 
 def get_channel():
     branch = os.environ['BRANCH_NAME']
-    if re.match(os.getenv("CONAN_STABLE_BRANCH_PATTERN", "^master$"), branch):
+    stable_branch_pattern = os.getenv("CONAN_STABLE_BRANCH_PATTERN", "release/*")
+    if fnmatch(branch, stable_branch_pattern):
         return "stable"
     return "testing"
 
@@ -59,6 +60,7 @@ def get_channel():
 def build(conan_api):
     compiler = get_compiler()
     channel = get_channel()
+    options = [ "Qt:openssl=yes"] if platform.system() == "Windows" else []
     for arch in get_archs():
         for compiler_version in get_compiler_versions():
             conan_api.create(
@@ -69,7 +71,8 @@ def build(conan_api):
                     "arch={}".format(arch),
                     "compiler={}".format(compiler),
                     "compiler.version={}".format(compiler_version),
-                ]
+                ],
+                options=options
             )
 
 # Upload package
@@ -77,14 +80,13 @@ def upload(conan_api):
     remote, user, password = get_remote(conan_api)
     conan_api.authenticate(user, password, remote)
 
-    channel = get_channel()
-    conanfile = ConanFileLoader(None, None, ConanPythonRequire(None, None)).load_class('./conanfile.py')
+    (_, conanfile) = parse_conanfile('./conanfile.py', ConanPythonRequire(None, None))
     conan_api.upload(
-        pattern="{}/{}@arobasmusic/{}".format(conanfile.name, conanfile.version, channel),
+        pattern="{}/{}@arobasmusic/{}".format(conanfile.name, conanfile.version, get_channel()),
         remote_name=remote
     )
 
 if __name__ == "__main__":
-    (conan_api, _, _) = Conan.factory()
-    build(conan_api)
-    upload(conan_api)
+    (CONAN_API, _, _) = Conan.factory()
+    build(CONAN_API)
+    upload(CONAN_API)
