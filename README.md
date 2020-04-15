@@ -1,19 +1,11 @@
 Conan package for Qt
 --------------------------------------------
 
-[![Build Status](https://travis-ci.org/osechet/conan-qt.svg?branch=testing/5.8.0)](https://travis-ci.org/osechet/conan-qt)
+[Conan.io](https://conan.io) package for [Qt](https://www.qt.io) library.
+This package includes by default the Qt Base module (Core, Gui, Widgets,
+Network, ...). Others modules can be added using options.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/gboj3x82d42eoasw/branch/testing/5.8.0?svg=true)](https://ci.appveyor.com/project/osechet/conan-qt)
-
-[ ![Download](https://api.bintray.com/packages/osechet/Conan/Qt%3Aosechet/images/download.svg?version=5.8.0%3Atesting) ](https://bintray.com/osechet/Conan/Qt%3Aosechet/5.8.0%3Atesting/link)
-
-[Conan.io](https://conan.io) package for [Qt](https://www.qt.io) library. This package includes by default the Qt Base module (Core, Gui, Widgets, Network, ...). Others modules can be added using options.
-
-The packages generated with this **conanfile** can be found in [bintray.com](https://bintray.com/osechet/Conan).
-
-## Reuse the package
-
-### Basic setup
+## Basic setup
 
 ```
 $ conan search "Qt/*" -r arobasmusic
@@ -26,7 +18,7 @@ Qt/5.12.8-1@arobasmusic/stable
 $ conan install "Qt/5.12.8-1@arobasmusic/stable" -r arobasmusic
 ```
 
-### Options
+## Options
 
 * `canvas3d` - `True`, `False` - enable/disable _canvas4d_ _Qt_ module,
 * `connectivity` - `True`, `False` - enable/disable _connectivity_ _Qt_ module,
@@ -38,7 +30,7 @@ $ conan install "Qt/5.12.8-1@arobasmusic/stable" -r arobasmusic
 * `webengine` - `True`, `False` - enable/disable _webengine_ _Qt_ module,
 * `websockets` - `True`, `False` - enable/disable _websockets_ _Qt_ module.
 
-#### Windows specific options
+### Windows specific options
 * `opengl` - possible values are:
     - `"desktop"`,
     - `"dynamic"`.
@@ -48,12 +40,12 @@ $ conan install "Qt/5.12.8-1@arobasmusic/stable" -r arobasmusic
     - `"yes"`,
     - `"linked"`.
 
-#### Windows specific options
+### Windows specific options
 * `framework`
     - `True`, will build frameworks,
     - `False`, will build dylib only.
 
-### Project setup
+## Project setup
 
 If you handle multiple dependencies in your project is better to add a *conanfile.txt*
 
