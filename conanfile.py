@@ -36,6 +36,10 @@ class QtConan(ConanFile):
     def build_dir(self):
         return os.path.join(self.build_folder, "qt5")
 
+    @property
+    def openssl_prefix_dir(self):
+        return self.deps_cpp_info['OpenSSL'].rootpath
+
     def configure(self):
         del self.settings.build_type
         if self.settings.arch == "x86":
@@ -121,10 +125,11 @@ class QtConan(ConanFile):
         if self.options.opengl == "dynamic":
             args += ["-angle"]
             env.update({'QT_ANGLE_PLATFORM': 'd3d11'})
+        # OpenSSL prefix
         if self.options.openssl == "no":
             args += ["-no-openssl"]
         elif self.options.openssl == "yes":
-            args += ["-openssl"]
+            args += ["-openssl", "OPENSSL_PREFIX={}".format(self.openssl_prefix_dir)]
         else:
             args += ["-openssl-linked"]
         args += ["-direct2d"]
