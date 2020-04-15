@@ -67,6 +67,7 @@ def build(conan_api):
                 "./conanfile.py",
                 user="arobasmusic",
                 channel=channel,
+                build_modes=["missing"],
                 settings=[
                     "arch={}".format(arch),
                     "compiler={}".format(compiler),
