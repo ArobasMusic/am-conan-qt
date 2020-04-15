@@ -16,8 +16,42 @@ The packages generated with this **conanfile** can be found in [bintray.com](htt
 ### Basic setup
 
 ```
-$ conan install Qt/5.8.0@osechet/testing
+$ conan search "Qt/*" -r arobasmusic
+Qt/5.9.8-4@arobasmusic/testing
+Qt/5.9.8-53@arobasmusic/stable
+Qt/5.12.5-5@arobasmusic/testing
+Qt/5.12.8-13@arobasmusic/testing
+Qt/5.12.8-1@arobasmusic/stable
+
+$ conan install "Qt/5.12.8-1@arobasmusic/stable" -r arobasmusic
 ```
+
+### Options
+
+* `canvas3d` - `True`, `False` - enable/disable _canvas4d_ _Qt_ module,
+* `connectivity` - `True`, `False` - enable/disable _connectivity_ _Qt_ module,
+* `gamepad` - `True`, `False` - enable/disable _gamepad_ _Qt_ module,
+* `graphicaleffects` - `True`, `False` - enable/disable _graphicaleffects_ _Qt_ module,
+* `location` - `True`, `False` - enable/disable _location_ _Qt_ module,
+* `serialport` - `True`, `False` - enable/disable _serialport_ _Qt_ module,
+* `tools` - `True`, `False` - enable/disable _tools_ _Qt_ module,
+* `webengine` - `True`, `False` - enable/disable _webengine_ _Qt_ module,
+* `websockets` - `True`, `False` - enable/disable _websockets_ _Qt_ module.
+
+#### Windows specific options
+* `opengl` - possible values are:
+    - `"desktop"`,
+    - `"dynamic"`.
+
+* `openssl` - possible values are:
+    - `"no"`,
+    - `"yes"`,
+    - `"linked"`.
+
+#### Windows specific options
+* `framework`
+    - `True`, will build frameworks,
+    - `False`, will build dylib only.
 
 ### Project setup
 
@@ -25,12 +59,14 @@ If you handle multiple dependencies in your project is better to add a *conanfil
 
 ```
     [requires]
-    Qt/5.8.0@osechet/testing
+    Qt/5.12.8-1@arobasmusic/stable
 
     [options]
     Qt:shared=true # false
     # On Windows, you can choose the opengl mode, default is 'desktop'
     Qt:opengl=desktop # dynamic
+    # On Windows, you can choose to enable/disable openssl support, default is 'no'
+    Qt:openssl=yes
     # If you need specific Qt modules, you can add them as follow:
     Qt:websockets=true
     Qt:xmlpatterns=true
@@ -39,22 +75,3 @@ If you handle multiple dependencies in your project is better to add a *conanfil
     txt
     cmake
 ```
-
-Complete the installation of requirements for your project running:
-
-```
-    conan install .
-```
-
-Project setup installs the library (and all his dependencies) and generates the files *conanbuildinfo.txt* and *conanbuildinfo.cmake* with all the paths and variables that you need to link with your dependencies.
-
-## Develop the package
-
-### Build packages
-
-    $ pip install conan_package_tools
-    $ python build.py
-
-### Upload packages to server
-
-    $ conan upload Qt/5.8.0@osechet/testing --all
