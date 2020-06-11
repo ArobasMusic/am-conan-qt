@@ -39,7 +39,7 @@ class QtConan(ConanFile):
 
     @property
     def openssl_prefix_dir(self):
-        return self.deps_cpp_info['OpenSSL'].rootpath 
+        return self.deps_cpp_info['OpenSSL'].rootpath
 
     def configure(self):
         del self.settings.build_type
@@ -147,7 +147,7 @@ class QtConan(ConanFile):
         args += ["-silent"]
         args += ["-framework" if self.options.framework else "-no-framework"]
         args += ["-platform macx-clang"]
-        args += ["QMAKE_MACOSX_DEPLOYMENT_TARGET={}".format(os_version if os_version else "10.12")]
+        args += ["QMAKE_MACOSX_DEPLOYMENT_TARGET={}".format(os_version if os_version else "10.13")]
         self.output.info("Using '{}' threads".format(cpu_count()))
         self.run("./configure {}".format(" ".join(args)), cwd=self.build_dir)
         self.run("make -j {}".format(cpu_count()), cwd=self.build_dir)
