@@ -20,7 +20,6 @@ pipeline {
                     }
                     steps {
                         sh '''
-                            conan remove "Qt/*@arobasmusic/*" -f
                             python3 $PWD/build.py
                         '''
                     }
@@ -36,7 +35,6 @@ pipeline {
                     }
                     steps {
                         sh '''
-                            conan remove "Qt/*@arobasmusic/*" -f
                             python $PWD/build.py
                         '''
                     }
