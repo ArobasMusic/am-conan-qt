@@ -35,6 +35,7 @@ pipeline {
                     }
                     steps {
                         sh '''
+                            dos2unix $PWD/conanfile.py
                             python $PWD/build.py
                         '''
                     }
