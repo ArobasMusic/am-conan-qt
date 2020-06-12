@@ -19,7 +19,7 @@ class QtConan(ConanFile):
         "gamepad": [True, False],
         "graphicaleffects": [True, False],
         "location": [True, False],
-        "opengl": ["desktop", "dynamic"],
+        "opengl": ["no", "desktop", "dynamic"],
         "openssl": ["no", "yes", "linked"],
         "serialport": [True, False],
         "tools": [True, False],
@@ -122,16 +122,22 @@ class QtConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             if self.settings.compiler.version == "14":
                 args += ["-platform win32-msvc2015"]
-        args += ["-opengl {}".format(self.options.opengl)]
-        if self.options.opengl == "dynamic":
-            args += ["-angle"]
-            env.update({'QT_ANGLE_PLATFORM': 'd3d11'})
+
+        if self.options.opengl == "no":
+            args += ["-no-opengl"]
+        else:
+            args += ["-opengl {}".format(self.options.opengl)]
+            if self.options.opengl == "dynamic":
+                args += ["-angle"]
+                env.update({'QT_ANGLE_PLATFORM': 'd3d11'})
+
         if self.options.openssl == "no":
             args += ["-no-openssl"]
         elif self.options.openssl == "yes":
             args += ["-openssl", "OPENSSL_PREFIX={}".format(self.openssl_prefix_dir)]
         else:
             args += ["-openssl-linked"]
+
         args += ["-direct2d"]
         env_build = VisualStudioBuildEnvironment(self)
         env.update(env_build.vars)
