@@ -39,7 +39,7 @@ class QtConan(ConanFile):
 
     @property
     def openssl_prefix_dir(self):
-        return self.deps_cpp_info['OpenSSL'].rootpath
+        return self.deps_cpp_info['openssl'].rootpath
 
     def configure(self):
         del self.settings.build_type
@@ -48,8 +48,8 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             del self.settings.compiler.runtime
             if self.options.openssl in ["yes", "linked"]:
-                self.options["OpenSSL"].no_zlib = True
-                self.options["OpenSSL"].shared = True
+                self.options["openssl"].no_zlib = True
+                self.options["openssl"].shared = True
 
     def config_options(self):
         if self.settings.os != "Windows":
