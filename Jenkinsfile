@@ -17,11 +17,17 @@ pipeline {
                     }
                     environment {
                         CONAN_APPLE_CLANG_VERSIONS = '11.0'
+                        CONAN_USER_HOME = "${env.WORKSPACE}"
                     }
                     steps {
                         sh '''
-                            python3 $PWD/build.py
+                            python3 "$PWD/build.py"
                         '''
+                    }
+                    post {
+                        always {
+                            sh 'rm -fr "$CONAN_USER_HOME/.conan"'
+                        }
                     }
                 }
                 stage('Windows') {
@@ -30,6 +36,7 @@ pipeline {
                     }
                     environment {
                         CONAN_BASH_PATH = 'C:\\Program Files\\Git\\usr\\bin\\bash.exe'
+                        CONAN_USER_HOME = "${env.WORKSPACE}"
                         CONAN_VISUAL_RUNTIMES = 'MD,MDd'
                         CONAN_VISUAL_VERSIONS = '16'
                     }
@@ -38,6 +45,11 @@ pipeline {
                             dos2unix $PWD/conanfile.py
                             python $PWD/build.py
                         '''
+                    }
+                    post {
+                        always {
+                            sh 'rm -fr "$CONAN_USER_HOME/.conan"'
+                        }
                     }
                 }
             }
