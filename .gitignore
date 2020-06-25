@@ -63,5 +63,8 @@ target/
 # masOS .DS_Store
 .DS_Store
 
+# Conan cache
+/.conan
+
 # Local test script
-run.sh
+/run.sh
