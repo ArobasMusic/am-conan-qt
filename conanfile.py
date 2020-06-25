@@ -11,7 +11,7 @@ class QtConan(ConanFile):
     version = qtconf.PKG_VERSION
     description = "Conan.io package for Qt library."
     source_dir = "qt5"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch", "compiler"
     options = {
         "canvas3d": [True, False],
         "framework": [True, False],
@@ -42,7 +42,6 @@ class QtConan(ConanFile):
         return self.deps_cpp_info['openssl'].rootpath
 
     def configure(self):
-        del self.settings.build_type
         if self.settings.arch == "x86":
             raise Exception("Unsupported architecture 'x86'")
         if self.settings.os == "Windows":
