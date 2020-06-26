@@ -159,4 +159,5 @@ class QtConan(ConanFile):
         self.run("make install", cwd=self.build_dir)
 
     def package(self):
-        self.copy("*", dst="src", src=os.path.join(self.source_folder, self.source_dir))
+        source_path = os.path.join(self.source_folder, self.source_dir)
+        self.copy("*", dst="src", src=source_path, excludes="**/.obj/**/*.o")
