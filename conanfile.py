@@ -160,4 +160,4 @@ class QtConan(ConanFile):
 
     def package(self):
         source_path = os.path.join(self.source_folder, self.source_dir)
-        self.copy("*", dst="src", src=source_path, excludes="**/.obj/**/*.o")
+        self.copy("*", dst="src", src=source_path)
