@@ -158,6 +158,11 @@ class QtConan(ConanFile):
         self.run("make -j {}".format(cpu_count()), cwd=self.build_dir)
         self.run("make install", cwd=self.build_dir)
 
+    def package_id(self):
+        del self.info.settings.build_type
+        if self.info.settings.os.version:
+            del self.info.settings.os.version
+
     def package(self):
         source_path = os.path.join(self.source_folder, self.source_dir)
         self.copy("*", dst="src", src=source_path)
