@@ -148,20 +148,13 @@ class QtConan(ConanFile):
 
     def _build_macos(self, args):
         os_version = self.settings.get_safe('os.version')
-
         args += ["-silent"]
         args += ["-framework" if self.options.framework else "-no-framework"]
         args += ["-platform macx-clang"]
         args += ["QMAKE_MACOSX_DEPLOYMENT_TARGET={}".format(os_version if os_version else "10.13")]
-        self.output.info("Using '{}' threads".format(cpu_count()))
         self.run("./configure {}".format(" ".join(args)), cwd=self.build_dir)
         self.run("make -j {}".format(cpu_count()), cwd=self.build_dir)
         self.run("make install", cwd=self.build_dir)
-
-    def package_id(self):
-        del self.info.settings.build_type
-        if self.info.settings.os.version:
-            del self.info.settings.os.version
 
     def package(self):
         source_path = os.path.join(self.source_folder, self.source_dir)
