@@ -17,6 +17,7 @@ pipeline {
                     }
                     environment {
                         CONAN_APPLE_CLANG_VERSIONS = '11.0'
+                        CONAN_OS_VERSIONS='10.13'
                         CONAN_USER_HOME = "${env.WORKSPACE}"
                     }
                     steps {
