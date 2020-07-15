@@ -32,10 +32,10 @@ class QtConan(ConanFile):
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
 
+
     @property
     def build_dir(self):
         return os.path.join(self.build_folder, "qt5")
-
 
     @property
     def openssl_prefix_dir(self):
@@ -47,7 +47,7 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             del self.settings.compiler.runtime
             if self.options.openssl in ["yes", "linked"]:
-                self.options["openssl"].no_zlib = True
+                # self.options["openssl"].no_zlib = True
                 self.options["openssl"].shared = True
 
     def config_options(self):
