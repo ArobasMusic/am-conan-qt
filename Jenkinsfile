@@ -22,12 +22,17 @@ pipeline {
                     }
                     steps {
                         sh '''
+                            conan remove -f --locks
+                            conan remove -f "*"
                             python3 "$PWD/build.py"
                         '''
                     }
                     post {
                         always {
-                            sh 'rm -fr "$CONAN_USER_HOME/.conan"'
+                            sh '''
+                                conan remove -f "*"
+                                rm -fr "$CONAN_USER_HOME/.conan"
+                            '''
                         }
                     }
                 }
@@ -43,13 +48,18 @@ pipeline {
                     }
                     steps {
                         sh '''
-                            dos2unix $PWD/conanfile.py
-                            python $PWD/build.py
+                            dos2unix "$PWD/conanfile.py"
+                            conan remove -f --locks
+                            conan remove -f "*"
+                            python "$PWD/build.py"
                         '''
                     }
                     post {
                         always {
-                            sh 'rm -fr "$CONAN_USER_HOME/.conan"'
+                            sh '''
+                                conan remove -f "*"
+                                rm -fr "$CONAN_USER_HOME/.conan"
+                            '''
                         }
                     }
                 }
