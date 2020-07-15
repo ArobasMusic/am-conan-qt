@@ -48,7 +48,6 @@ pipeline {
                     }
                     steps {
                         sh '''
-                            dos2unix "$PWD/conanfile.py"
                             conan remove -f --locks
                             conan remove -f "*"
                             python "$PWD/build.py"
