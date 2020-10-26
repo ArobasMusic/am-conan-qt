@@ -47,7 +47,6 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             del self.settings.compiler.runtime
             if self.options.openssl in ["yes", "linked"]:
-                # self.options["openssl"].no_zlib = True
                 self.options["openssl"].shared = True
 
     def config_options(self):
@@ -74,8 +73,8 @@ class QtConan(ConanFile):
         else:
             submodules.append("qtmacextras")
         for module in ["connectivity", "canvas3d", "gamepad", "graphicaleffects", "location", "serialport", "tools", "webengine", "websockets"]:
-            option = self.options[module]
-            if option.value:
+            option = self.options.get_safe(module)
+            if option:
                 submodules.append("qt{}".format(module))
         self.run("git clone https://code.qt.io/qt/qt5.git")
         self.run("cd {} && git checkout {}".format(self.source_dir, qtconf.BRANCH))
