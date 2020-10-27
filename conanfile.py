@@ -11,7 +11,7 @@ class QtConan(ConanFile):
     version = qtconf.PKG_VERSION
     description = "Conan.io package for Qt library."
     source_dir = "qt5"
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "canvas3d": [True, False],
         "framework": [True, False],
@@ -44,6 +44,8 @@ class QtConan(ConanFile):
     def configure(self):
         if self.settings.arch == "x86":
             raise Exception("Unsupported architecture 'x86'")
+        if self.settings.os != "Linux":
+            del self.settings.build_type
         if self.settings.os == "Windows":
             del self.settings.compiler.runtime
             if self.options.openssl in ["yes", "linked"]:
@@ -51,9 +53,12 @@ class QtConan(ConanFile):
 
     def config_options(self):
         if self.settings.os != "Windows":
-            del self.options.opengl
             del self.options.openssl
-        else:
+        
+        if self.settings.os == "Macos":
+            del self.options.opengl
+        
+        if self.settings.os != "Macos":
             del self.options.framework
 
     def build_requirements(self):
@@ -85,7 +90,6 @@ class QtConan(ConanFile):
 
     def build(self):
         args = [
-            "-debug-and-release",
             "-opensource",
             "-confirm-license",
             "-nomake examples",
@@ -97,8 +101,15 @@ class QtConan(ConanFile):
         ]
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self._build_msvc(args)
-        else:
+        elif self.settings.os == "Linux" and self.settings.compiler == "clang":
+            self._build_linux_clang(args)
+        elif self.settings.os == "Macos":
             self._build_macos(args)
+        else:
+            raise Exception("Unsupport configuration os='{}' compiler={}".format(
+                self.settings.os,
+                self.settings.compiler
+            ))
 
     def _build_msvc(self, args):
         build_command = find_executable("jom.exe")
@@ -136,7 +147,10 @@ class QtConan(ConanFile):
         else:
             args += ["-openssl-linked"]
 
-        args += ["-direct2d"]
+        args += [
+            "-direct2d",
+            "-debug-and-release"
+        ]
         env_build = VisualStudioBuildEnvironment(self)
         env.update(env_build.vars)
         with tools.environment_append(env):
@@ -147,10 +161,26 @@ class QtConan(ConanFile):
 
     def _build_macos(self, args):
         os_version = self.settings.get_safe('os.version')
-        args += ["-silent"]
+        args += [
+            "-debug-and-release",
+            "-platform macx-clang"
+            "-silent",
+        ]
         args += ["-framework" if self.options.framework else "-no-framework"]
-        args += ["-platform macx-clang"]
         args += ["QMAKE_MACOSX_DEPLOYMENT_TARGET={}".format(os_version if os_version else "10.13")]
+        self.run("./configure {}".format(" ".join(args)), cwd=self.build_dir)
+        self.run("make -j {}".format(cpu_count()), cwd=self.build_dir)
+        self.run("make install", cwd=self.build_dir)
+
+    def _build_linux_clang(self, args):
+        args += [
+            "-silent",
+            "-platform linux-clang"
+        ]
+
+        if self.options.get_safe("opengl") == "no":
+            args += ["-no-opengl"]
+
         self.run("./configure {}".format(" ".join(args)), cwd=self.build_dir)
         self.run("make -j {}".format(cpu_count()), cwd=self.build_dir)
         self.run("make install", cwd=self.build_dir)
