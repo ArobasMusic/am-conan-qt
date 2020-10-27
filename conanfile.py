@@ -54,10 +54,10 @@ class QtConan(ConanFile):
     def config_options(self):
         if self.settings.os != "Windows":
             del self.options.openssl
-        
+
         if self.settings.os == "Macos":
             del self.options.opengl
-        
+
         if self.settings.os != "Macos":
             del self.options.framework
 
@@ -163,7 +163,7 @@ class QtConan(ConanFile):
         os_version = self.settings.get_safe('os.version')
         args += [
             "-debug-and-release",
-            "-platform macx-clang"
+            "-platform macx-clang",
             "-silent",
         ]
         args += ["-framework" if self.options.framework else "-no-framework"]
