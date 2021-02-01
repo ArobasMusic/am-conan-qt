@@ -74,7 +74,6 @@ class QtConan(ConanFile):
         if self.settings.os == "Macos":
             cmake_definitions.update({
                 "FEATURE_framework": "ON" if self.options.get_safe("framework") else "OFF",
-                "QT_QMAKE_TARGET_MKSPEC": "macx-clang",
             })
 
         configure_args = " ".join(
