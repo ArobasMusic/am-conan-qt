@@ -77,7 +77,9 @@ class QtConan(ConanFile):
                 "QT_QMAKE_TARGET_MKSPEC": "macx-clang",
             })
 
-        configure_args = " ".join([f"-D{var}={value}" for var, value in cmake_definitions.items()])
+        configure_args = " ".join(
+            [f"-D{var}={value}" for var, value in cmake_definitions.items()]
+        )
 
         self.run(f"{os.path.join(self.source_folder, 'qt', 'configure')} -- {configure_args}")
         cmake = CMake(self)
