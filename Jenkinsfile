@@ -17,7 +17,10 @@ pipeline {
                     }
                     steps {
                         sh '''
-                            conan remove "Qt/*@arobasmusic/*" -f
+                            python3 -m venv .venv
+                            source .venv/bin/activate
+                            pip install conan==1.30.2 conan_package_tools
+                            conan remove -f "*"
                             python3 $PWD/build.py
                         '''
                     }
@@ -28,7 +31,10 @@ pipeline {
                     }
                     steps {
                         sh '''
-                            conan remove "Qt/*@arobasmusic/*" -f
+                            python -m venv .venv
+                            source .venv/Scripts/activate
+                            pip install conan==1.30.2 conan_package_tools
+                            conan remove -f "*"
                             python $PWD/build.py
                         '''
                     }
