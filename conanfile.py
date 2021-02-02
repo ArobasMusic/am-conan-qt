@@ -14,7 +14,7 @@ class QtConan(ConanFile):
     options = {
         "framework": [True, False],
     }
-    default_options = "framework=False",
+    default_options = "framework=False"
     exports = "LICENSE.md", "qtconf.py",
     license = "http://doc.qt.io/qt-5/lgpl.html"
     url = "https://github.com/ArobasMusic/conan-qt"
@@ -25,21 +25,13 @@ class QtConan(ConanFile):
     def build_dir(self):
         return os.path.join(self.build_folder, "qt5")
 
-    @property
-    def openssl_prefix_dir(self):
-        return self.deps_cpp_info['openssl'].rootpath
-
     def configure(self):
         if self.settings.arch == "x86":
             raise Exception("Unsupported architecture 'x86'")
         if self.settings.os == "Windows":
             del self.settings.compiler.runtime
-            if self.options.openssl in ["yes", "linked"]:
-                self.options["openssl"].shared = True
 
     def config_options(self):
-        if self.settings.os != "Windows":
-            del self.options.openssl
         if self.settings.os == "Macos":
             del self.options.opengl
         if self.settings.os != "Macos":
@@ -47,12 +39,8 @@ class QtConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("ninja/1.10.2")
-        if self.settings.os == "Windows" and self.options.openssl == "yes":
+        if self.settings.os == "Windows":
             self.build_requires("openssl/1.1.1g")
-
-    def requirements(self):
-        if self.settings.os == "Windows" and self.options.openssl == "linked":
-            self.requires("openssl/1.1.1g")
 
     def source(self):
         git = tools.Git(folder="qt")
@@ -76,14 +64,22 @@ class QtConan(ConanFile):
                 "FEATURE_framework": "ON" if self.options.get_safe("framework") else "OFF",
             })
 
+        if self.settings.os == "Windows":
+            cmake_definitions.update({
+                "INPUT_openssl": "runtime",
+                "OPENSSL_ROOT_DIR": self.deps_cpp_info['openssl'].rootpath
+            })
+
         configure_args = " ".join(
             [f"-D{var}={value}" for var, value in cmake_definitions.items()]
         )
 
-        self.run(f"{os.path.join(self.source_folder, 'qt', 'configure')} -- {configure_args}")
-        cmake = CMake(self)
-        cmake.build()
-        cmake.install()
+        env_vars = tools.vcvars_dict(self) if self.settings.os == "Windows" else {}
+        with tools.environment_append(env_vars):
+            self.run(f"{os.path.join(self.source_folder, 'qt', 'configure')} -- {configure_args}")
+            cmake = CMake(self)
+            cmake.build()
+            cmake.install()
 
     def package(self):
         if self.settings.build_type == "Debug":
