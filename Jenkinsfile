@@ -6,6 +6,7 @@ pipeline {
         CONAN_BUILD_TYPES = 'Release'
         CONAN_ARCHS = 'x86_64'
         CONAN_STABLE_BRANCH_PATTERN = 'release/*'
+        CONAN_USER_HOME = "${env.WORKSPACE}"
     }
     stages {
         stage('Build') {
@@ -13,7 +14,13 @@ pipeline {
             parallel {
                 stage('macOS') {
                     agent {
-                        label 'macOS&&clang-11.0'
+                        label 'macOS'
+                    }
+                    environment {
+                        CONAN_APPLE_CLANG_VERSIONS = '12.0'
+                        CONAN_ARCHS = 'x86_64'
+                        CONAN_OS_VERSIONS='10.10, 10.13'
+                        CONAN_USER_HOME = "${env.WORKSPACE}"
                     }
                     steps {
                         sh '''
@@ -27,7 +34,13 @@ pipeline {
                 }
                 stage('Windows') {
                     agent {
-                        label 'Windows&&vs14'
+                        label 'Windows'
+                    }
+                    environment {
+                        CONAN_BASH_PATH = 'C:\\Program Files\\Git\\usr\\bin\\bash.exe'
+                        CONAN_USER_HOME = "${env.WORKSPACE}"
+                        CONAN_VISUAL_RUNTIMES = 'MD,MDd'
+                        CONAN_VISUAL_VERSIONS = '16'
                     }
                     steps {
                         sh '''
