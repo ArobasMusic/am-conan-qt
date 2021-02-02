@@ -63,3 +63,5 @@ target/
 # Local test script
 run.sh
 /**/.DS_Store
+
+tmp/

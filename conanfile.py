@@ -19,15 +19,17 @@ class QtConan(ConanFile):
         "gamepad": [True, False],
         "graphicaleffects": [True, False],
         "location": [True, False],
+        "multimedia": [True, False],
         "opengl": ["desktop", "dynamic"],
         "openssl": ["no", "yes", "linked"],
         "serialport": [True, False],
         "tools": [True, False],
         "webengine": [True, False],
         "websockets": [True, False],
+        "websockets": [True, False],
     }
     exports = ["LICENSE.md", "qtconf.py"]
-    default_options = "canvas3d=False", "connectivity=False", "framework=False", "gamepad=False", "graphicaleffects=False", "location=False", "opengl=dynamic", "openssl=no", "serialport=False", "tools=False", "webengine=False", "websockets=False"
+    default_options = "canvas3d=False", "connectivity=False", "framework=False", "gamepad=False", "graphicaleffects=False", "multimedia=False", "location=False", "opengl=dynamic", "openssl=no", "serialport=False", "tools=False", "webengine=False", "websockets=False"
     url = "https://github.com/ArobasMusic/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
@@ -54,22 +56,22 @@ class QtConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == "Windows":
             if self.options.openssl == "yes":
-                self.build_requires("OpenSSL/1.0.2l@conan/stable")
+                self.build_requires("openssl/1.0.2u@")
 
     def requirements(self):
         if self.settings.os == "Windows":
             if self.options.openssl == "linked":
-                self.requires("OpenSSL/1.0.2l@conan/stable")
+                self.requires("openssl/1.0.2u@")
 
     def source(self):
-        submodules = ["qtbase", "qtimageformats", "qtmultimedia", "qtsvg", "qttools", "qttranslations", "qtxmlpatterns"]
+        submodules = ["qtbase", "qtimageformats", "qtsvg", "qttools", "qttranslations", "qtxmlpatterns"]
         if self.settings.os == "Windows":
             submodules.append("qtwinextras")
         else:
             submodules.append("qtmacextras")
-        for module in ["connectivity", "canvas3d", "gamepad", "graphicaleffects", "location", "serialport", "tools", "webengine", "websockets"]:
+        for module in ["connectivity", "canvas3d", "gamepad", "graphicaleffects", "multimedia", "location", "serialport", "tools", "webengine", "websockets"]:
             option = self.options[module]
-            if option.value:
+            if bool(option):
                 submodules.append("qt{}".format(module))
         self.run("git clone https://code.qt.io/qt/qt5.git")
         self.run("cd {} && git checkout v{}".format(self.source_dir, qtconf.branch))
