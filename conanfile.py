@@ -39,7 +39,7 @@ class QtConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("ninja/1.10.2")
-        if self.settings.os == "Windows":
+        if self.settings.os in ("Linux", "Windows"):
             self.build_requires("openssl/1.1.1g")
 
     def source(self):
@@ -49,34 +49,55 @@ class QtConan(ConanFile):
         self.run("perl init-repository", cwd=os.path.join(self.source_folder, "qt"))
 
     def build(self):
+
         cmake_definitions = {
             "BUILD_SHARED_LIBS": "YES",
             "CMAKE_INSTALL_PREFIX": self.package_folder,
             "CMAKE_BUILD_TYPE": self.settings.build_type,
-            "FEATURE_sql": "OFF",
-            "FEATURE_dbus": "OFF",
-            "QT_BUILD_TESTS": "OFF",
-            "QT_BUILD_EXAMPLES": "OFF",
         }
+        configure_options = [
+            "-no-sql-mysql",
+            "-no-sql-sqlite",
+            "-no-dbus",
+            "-nomake", "tests",
+            "-nomake", "examples",
+            "-opensource",
+            "-confirm-license",
+        ]
+        env_vars = {}
+
+        if self.settings.os == "Linux":
+            configure_options += [
+                "-no-opengl",
+                "-platform", "linux-clang",
+                "-skip", "qtdoc",
+                "-skip", "qttools",
+                "-skip", "qttranslations",
+                "-skip", "qtquick3d"
+            ]
 
         if self.settings.os == "Macos":
-            cmake_definitions.update({
-                "FEATURE_framework": "ON" if self.options.get_safe("framework") else "OFF",
-            })
+            configure_options += [
+                "-framework" if self.options.get_safe("framework") else "-no-framework"
+            ]
 
         if self.settings.os == "Windows":
+            env_vars.update(tools.vcvars_dict(self))
+
+        if self.settings.os in ("Linux", "Windows"):
+            configure_options += [
+                "-openssl-runtime",
+            ]
             cmake_definitions.update({
-                "INPUT_openssl": "runtime",
                 "OPENSSL_ROOT_DIR": self.deps_cpp_info['openssl'].rootpath
             })
 
-        configure_args = " ".join(
-            [f"-D{var}={value}" for var, value in cmake_definitions.items()]
-        )
-
-        env_vars = tools.vcvars_dict(self) if self.settings.os == "Windows" else {}
         with tools.environment_append(env_vars):
-            self.run(f"{os.path.join(self.source_folder, 'qt', 'configure')} -- {configure_args}")
+            self.run("{} {} -- {}".format(
+                os.path.join(self.source_folder, "qt", "configure"),
+                " ".join(configure_options),
+                " ".join([f"-D{var}={value}" for var, value in cmake_definitions.items()])
+            ))
             cmake = CMake(self)
             cmake.build()
             cmake.install()
