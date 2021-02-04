@@ -50,18 +50,25 @@ class QtConan(ConanFile):
 
     def build(self):
         cmake_definitions = {
-            "BUILD_SHARED_LIBS": "YES",
-            "CMAKE_INSTALL_PREFIX": self.package_folder,
-            "CMAKE_BUILD_TYPE": self.settings.build_type,
+            # "BUILD_SHARED_LIBS": "YES",
+            # "CMAKE_BUILD_TYPE": self.settings.build_type,
+            # "CMAKE_INSTALL_PREFIX": self.package_folder,
+            ###
+            "QT_BUILD_EXAMPLES": "OFF",
+            "QT_BUILD_TESTS": "OFF",
+            ###
+            "FEATURE_dbus": "OFF",
+            "FEATURE_sql_mysql": "OFF",
+            "FEATURE_system_sqlite": "OFF",
         }
         configure_options = [
-            "-no-sql-mysql",
-            "-no-sql-sqlite",
-            "-no-dbus",
-            "-nomake", "tests",
-            "-nomake", "examples",
-            "-opensource",
-            "-confirm-license",
+            # "-no-sql-mysql",
+            # "-no-sql-sqlite",
+            # "-no-dbus",
+            # "-nomake", "tests",
+            # "-nomake", "examples",
+            # "-opensource",
+            # "-confirm-license",
         ]
         env_vars = {}
 
@@ -76,9 +83,13 @@ class QtConan(ConanFile):
             ]
 
         if self.settings.os == "Macos":
-            configure_options += [
-                "-framework" if self.options.get_safe("framework") else "-no-framework"
-            ]
+            cmake_definitions = {
+                "FEATURE_framework": "ON" if self.options.get_safe("framework", False) else "OFF",
+                "QT_QMAKE_TARGET_MKSPEC": "macx-clang",
+            }
+            # configure_options += [
+            #     "-framework" if self.options.get_safe("framework") else "-no-framework"
+            # ]
 
         if self.settings.os == "Windows":
             env_vars.update(tools.vcvars_dict(self))
@@ -92,12 +103,17 @@ class QtConan(ConanFile):
             })
 
         with tools.environment_append(env_vars):
-            self.run("{} {} -- {}".format(
-                os.path.join(self.source_folder, "qt", "configure"),
-                " ".join(configure_options),
-                " ".join([f"-D{var}={value}" for var, value in cmake_definitions.items()])
-            ))
-            cmake = CMake(self)
+            # self.run("{} {} -- {}".format(
+            #     os.path.join(self.source_folder, "qt", "configure"),
+            #     " ".join(configure_options),
+            #     " ".join([f"-D{var}={value}" for var, value in cmake_definitions.items()])
+            # ))
+            # cmake = CMake(self)
+            cmake = CMake(self, generator="Ninja")
+            cmake.configure(
+                defs=cmake_definitions,
+                source_folder=os.path.join(self.source_folder, "qt"),
+            )
             cmake.build()
             cmake.install()
 
