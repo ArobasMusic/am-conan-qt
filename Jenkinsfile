@@ -3,9 +3,8 @@ pipeline {
         label 'master'
     }
     environment {
-        CONAN_STABLE_BRANCH_PATTERN = 'release/*'
-        CONAN_BUILD_TYPES = 'Release'
         CONAN_ARCHS = 'x86_64'
+        CONAN_STABLE_BRANCH_PATTERN = 'release/*'
     }
     stages {
         stage('Build') {
@@ -16,20 +15,22 @@ pipeline {
                         label 'macOS'
                     }
                     environment {
-                        CONAN_APPLE_CLANG_VERSIONS = '11.0'
-                        CONAN_OS_VERSIONS='10.13'
+                        CONAN_APPLE_CLANG_VERSIONS = '12.0'
                         CONAN_USER_HOME = "${env.WORKSPACE}"
                     }
                     steps {
                         sh '''
-                            conan remove -f --locks
+                            python3 -m venv .venv
+                            source .venv/bin/activate
+                            pip install conan==1.30.2 conan_package_tools
                             conan remove -f "*"
-                            python3 "$PWD/build.py"
+                            python "$PWD/build.py"
                         '''
                     }
                     post {
                         always {
                             sh '''
+                                source .venv/bin/activate
                                 conan remove -f "*"
                                 rm -fr "$CONAN_USER_HOME/.conan"
                             '''
@@ -41,14 +42,15 @@ pipeline {
                         label 'Windows'
                     }
                     environment {
-                        CONAN_BASH_PATH = 'C:\\Program Files\\Git\\usr\\bin\\bash.exe'
                         CONAN_USER_HOME = "${env.WORKSPACE}"
                         CONAN_VISUAL_RUNTIMES = 'MD,MDd'
                         CONAN_VISUAL_VERSIONS = '16'
                     }
                     steps {
                         sh '''
-                            conan remove -f --locks
+                            python -m venv .venv
+                            source .venv/Scripts/activate
+                            pip install conan==1.30.2 conan_package_tools
                             conan remove -f "*"
                             python "$PWD/build.py"
                         '''
@@ -56,6 +58,7 @@ pipeline {
                     post {
                         always {
                             sh '''
+                                source .venv/Scripts/activate
                                 conan remove -f "*"
                                 rm -fr "$CONAN_USER_HOME/.conan"
                             '''
