@@ -49,7 +49,6 @@ class QtConan(ConanFile):
         self.run("perl init-repository", cwd=os.path.join(self.source_folder, "qt"))
 
     def build(self):
-
         cmake_definitions = {
             "BUILD_SHARED_LIBS": "YES",
             "CMAKE_INSTALL_PREFIX": self.package_folder,
