@@ -65,6 +65,7 @@ target/
 
 # Conan cache
 /.conan
+/.venv
 
 # Local test script
 /run.sh

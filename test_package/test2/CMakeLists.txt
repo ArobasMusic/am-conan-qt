@@ -11,7 +11,7 @@ target_include_directories(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-        Qt5::Core
+        Qt6::Core
 )
 
 if(NOT MSVC)

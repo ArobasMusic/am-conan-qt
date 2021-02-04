@@ -1,6 +1,6 @@
 project(test3)
 
-find_package(Qt5Widgets REQUIRED)
+find_package(Qt6Widgets REQUIRED)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -17,7 +17,7 @@ target_include_directories(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-        Qt5::Widgets
+        Qt6::Widgets
 )
 
 # CTest is a testing tool that can be used to test your project.

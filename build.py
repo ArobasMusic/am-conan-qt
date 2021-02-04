@@ -1,18 +1,15 @@
 import os
 import platform
 
-from conan.packager import ConanMultiPackager
+from conanio.packager import ConanMultiPackager
 
 from conans.client.loader import parse_conanfile
 from conans.client.graph.python_requires import ConanPythonRequire
 
 def build():
-    (_, conanfile) = parse_conanfile('./conanfile.py', ConanPythonRequire(None, None))
     builder = ConanMultiPackager(
         build_policy="missing",
-        reference="{}/{}".format(conanfile.name, conanfile.version),
         username="arobasmusic",
-        remotes="http://conan.arobas-music.com"
     )
     builder.add_common_builds()
     if platform.system() == "Darwin":
