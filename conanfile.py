@@ -43,8 +43,8 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             del self.settings.compiler.runtime
             if self.options.openssl in ["yes", "linked"]:
-                self.options["OpenSSL"].no_zlib = True
-                self.options["OpenSSL"].shared = True
+                self.options["openssl"].no_zlib = True
+                self.options["openssl"].shared = True
 
     def config_options(self):
         if self.settings.os != "Windows":
@@ -56,12 +56,12 @@ class QtConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == "Windows":
             if self.options.openssl == "yes":
-                self.build_requires("openssl/1.0.2u@")
+                self.build_requires("openssl/1.1.1i@")
 
     def requirements(self):
         if self.settings.os == "Windows":
             if self.options.openssl == "linked":
-                self.requires("openssl/1.0.2u@")
+                self.requires("openssl/1.1.1i@")
 
     def source(self):
         submodules = ["qtbase", "qtimageformats", "qtsvg", "qttools", "qttranslations", "qtxmlpatterns"]
