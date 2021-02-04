@@ -91,31 +91,32 @@ class QtConan(ConanFile):
             #     "-framework" if self.options.get_safe("framework") else "-no-framework"
             # ]
 
-        if self.settings.os == "Windows":
-            env_vars.update(tools.vcvars_dict(self))
+        # if self.settings.os == "Windows":
+        #     env_vars.update(tools.vcvars_dict(self))
 
         if self.settings.os in ("Linux", "Windows"):
-            configure_options += [
-                "-openssl-runtime",
-            ]
+            # configure_options += [
+            #     "-openssl-runtime",
+            # ]
             cmake_definitions.update({
-                "OPENSSL_ROOT_DIR": self.deps_cpp_info['openssl'].rootpath
+                "INPUT_openssl": "runtime",
+                "OPENSSL_ROOT_DIR": self.deps_cpp_info['openssl'].rootpath,
             })
 
-        with tools.environment_append(env_vars):
+        # with tools.environment_append(env_vars):
             # self.run("{} {} -- {}".format(
             #     os.path.join(self.source_folder, "qt", "configure"),
             #     " ".join(configure_options),
             #     " ".join([f"-D{var}={value}" for var, value in cmake_definitions.items()])
             # ))
             # cmake = CMake(self)
-            cmake = CMake(self, generator="Ninja")
-            cmake.configure(
-                defs=cmake_definitions,
-                source_folder=os.path.join(self.source_folder, "qt"),
-            )
-            cmake.build()
-            cmake.install()
+        cmake = CMake(self, generator="Ninja")
+        cmake.configure(
+            defs=cmake_definitions,
+            source_folder=os.path.join(self.source_folder, "qt"),
+        )
+        cmake.build()
+        cmake.install()
 
     def package(self):
         if self.settings.build_type == "Debug":
