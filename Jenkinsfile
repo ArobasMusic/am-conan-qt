@@ -2,10 +2,6 @@ pipeline {
     agent {
         label 'master'
     }
-    environment {
-        CONAN_ARCHS = 'x86_64'
-        CONAN_STABLE_BRANCH_PATTERN = 'release/*'
-    }
     stages {
         stage('Build') {
             failFast true
@@ -15,7 +11,16 @@ pipeline {
                         label 'macOS'
                     }
                     environment {
-                        CONAN_APPLE_CLANG_VERSIONS = '12.0'
+                        // SHOULD BE DECLARED in pipeline.environment /////////
+                        CONAN_CHANNEL = "testing"
+                        CONAN_STABLE_BRANCH_PATTERN = 'release/*'
+                        CONAN_LOGIN_USERNAME_AROBASMUSIC = "${env.AM_ARTIFACTORY_AUTH_LOGIN}"
+                        CONAN_PASSWORD_AROBASMUSIC = "${env.AM_ARTIFACTORY_AUTH_TOKEN}"
+                        CONAN_REMOTES = ""
+                        CONAN_UPLOAD = "http://artifactory.arobas-music.com/artifactory/api/conan/conan@True@arobasmusic"
+                        ///////////////////////////////////////////////////////
+                        CONAN_APPLE_CLANG_VERSIONS = "12.0"
+                        CONAN_ARCHS = "x86_64"
                         CONAN_USER_HOME = "${env.WORKSPACE}"
                     }
                     steps {
@@ -42,6 +47,15 @@ pipeline {
                         label 'Windows'
                     }
                     environment {
+                        // SHOULD BE DECLARED in pipeline.environment /////////
+                        CONAN_CHANNEL = "testing"
+                        CONAN_STABLE_BRANCH_PATTERN = 'release/*'
+                        CONAN_LOGIN_USERNAME_AROBASMUSIC = "${env.AM_ARTIFACTORY_AUTH_LOGIN}"
+                        CONAN_PASSWORD_AROBASMUSIC = "${env.AM_ARTIFACTORY_AUTH_TOKEN}"
+                        CONAN_REMOTES = ""
+                        CONAN_UPLOAD = "http://artifactory.arobas-music.com/artifactory/api/conan/conan@True@arobasmusic"
+                        ///////////////////////////////////////////////////////
+                        CONAN_BASH_PATH = 'C:\\Program Files\\Git\\usr\\bin\\bash.exe'
                         CONAN_USER_HOME = "${env.WORKSPACE}"
                         CONAN_VISUAL_RUNTIMES = 'MD,MDd'
                         CONAN_VISUAL_VERSIONS = '16'
