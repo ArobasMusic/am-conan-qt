@@ -10,7 +10,7 @@ endif(APPLE)
 
 configure_file(qt.conf.in ${CMAKE_BINARY_DIR}/bin/qt.conf)
 
-find_package(Qt6Core REQUIRED)
+find_package(Qt5Core REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(AUTOMOC_MOC_OPTIONS PROPERTIES FOLDER CMakeAutomocTargets)
