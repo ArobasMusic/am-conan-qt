@@ -3,6 +3,7 @@ pipeline {
         label 'master'
     }
     environment {
+        CONAN_CHANNEL = "testing"
         CONAN_STABLE_BRANCH_PATTERN = 'release/*'
         CONAN_BUILD_TYPES = 'Release'
         CONAN_ARCHS = 'x86_64'
@@ -16,13 +17,6 @@ pipeline {
                         label 'macOS'
                     }
                     environment {
-                        // SHOULD BE DECLARED in pipeline.environment /////////
-                        CONAN_CHANNEL = "testing"
-                        CONAN_LOGIN_USERNAME_AROBASMUSIC = "${env.AM_ARTIFACTORY_AUTH_LOGIN}"
-                        CONAN_PASSWORD_AROBASMUSIC = "${env.AM_ARTIFACTORY_AUTH_TOKEN}"
-                        CONAN_REMOTES = ""
-                        CONAN_UPLOAD = "http://artifactory.arobas-music.com/artifactory/api/conan/conan@True@arobasmusic"
-                        ///////////////////////////////////////////////////////
                         CONAN_APPLE_CLANG_VERSIONS = "12.0"
                         CONAN_USER_HOME = "${env.WORKSPACE}"
                     }
@@ -50,14 +44,6 @@ pipeline {
                         label 'Windows'
                     }
                     environment {
-                        // SHOULD BE DECLARED in pipeline.environment /////////
-                        CONAN_CHANNEL = "testing"
-                        CONAN_STABLE_BRANCH_PATTERN = 'release/*'
-                        CONAN_LOGIN_USERNAME_AROBASMUSIC = "${env.AM_ARTIFACTORY_AUTH_LOGIN}"
-                        CONAN_PASSWORD_AROBASMUSIC = "${env.AM_ARTIFACTORY_AUTH_TOKEN}"
-                        CONAN_REMOTES = ""
-                        CONAN_UPLOAD = "http://artifactory.arobas-music.com/artifactory/api/conan/conan@True@arobasmusic"
-                        ///////////////////////////////////////////////////////
                         CONAN_BASH_PATH = 'C:\\Program Files\\Git\\usr\\bin\\bash.exe'
                         CONAN_USER_HOME = "${env.WORKSPACE}"
                         CONAN_VISUAL_RUNTIMES = 'MD,MDd'
