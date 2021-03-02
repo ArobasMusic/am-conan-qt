@@ -7,6 +7,10 @@ pipeline {
         CONAN_STABLE_BRANCH_PATTERN = 'release/*'
         CONAN_BUILD_TYPES = 'Release'
         CONAN_ARCHS = 'x86_64'
+        CONAN_REMOTES = "http://artifactory.arobas-music.com/artifactory/api/conan/conan@True@arobasmusic"
+        CONAN_UPLOAD = "http://artifactory.arobas-music.com/artifactory/api/conan/conan@True@arobasmusic"
+        CONAN_PASSWORD_AROBASMUSIC = credentials('arobas-music-artifactory-password')
+        CONAN_LOGIN_USERNAME_AROBASMUSIC = "amusic"
     }
     stages {
         stage('Build') {
