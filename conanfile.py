@@ -46,10 +46,13 @@ class QtConan(ConanFile):
             raise Exception("Unsupported architecture 'x86'")
         if self.settings.os != "Linux":
             del self.settings.build_type
+        if self.settings.os == "Macos":
+            del self.settings.os.version
         if self.settings.os == "Windows":
             del self.settings.compiler.runtime
             if self.options.openssl in ["yes", "linked"]:
                 self.options["openssl"].shared = True
+
 
     def config_options(self):
         if self.settings.os != "Windows":
