@@ -9,8 +9,7 @@ from conans.client.graph.python_requires import ConanPythonRequire
 def build():
     builder = ConanMultiPackager(
         build_policy="missing",
-        username="arobasmusic",
-        remotes="http://conan.arobas-music.com"
+        username="arobasmusic"
     )
     builder.add_common_builds()
     if platform.system() == "Darwin":
