@@ -68,3 +68,6 @@ run.sh
 /**/.DS_Store
 
 tmp/
+
+# Local conan cache
+.conan
