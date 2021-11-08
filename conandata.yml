@@ -1,0 +1,8 @@
+sources:
+  "5.15.2":
+    url: "https://code.qt.io/qt/qt5.git"
+    branch: "v5.15.2"
+patches:
+  "5.15.2":
+    - patch_file: "patches/qiosurfacegraphicsbuffer.patch"
+      base_path: "qt5/qtbase"

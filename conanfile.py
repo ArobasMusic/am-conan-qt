@@ -27,7 +27,21 @@ class QtConan(ConanFile):
         "websockets": [True, False],
     }
     exports = ["LICENSE.md", "qtconf.py"]
-    default_options = "canvas3d=False", "connectivity=False", "framework=False", "gamepad=False", "graphicaleffects=False", "location=False", "opengl=no", "openssl=yes", "serialport=False", "tools=False", "webengine=False", "websockets=False"
+    exports_sources = ["patches/*"]
+    default_options = (
+        "canvas3d=False",
+        "connectivity=False",
+        "framework=False",
+        "gamepad=False",
+        "graphicaleffects=False",
+        "location=False",
+        "opengl=no",
+        "openssl=yes",
+        "serialport=False",
+        "tools=False",
+        "webengine=False",
+        "websockets=False",
+    )
     url = "https://github.com/ArobasMusic/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
@@ -84,10 +98,17 @@ class QtConan(ConanFile):
             option = self.options.get_safe(module)
             if option:
                 submodules.append("qt{}".format(module))
-        self.run("git clone https://code.qt.io/qt/qt5.git")
-        self.run("cd {} && git checkout {}".format(self.source_dir, qtconf.BRANCH))
+
+        git = tools.Git(self.source_dir)
+        git.clone(**self.conan_data["sources"][qtconf.QT_VERSION])
+
         self.run("cd {} && perl init-repository --no-update --module-subset={}".format(self.source_dir, ",".join(submodules)))
         self.run("cd {} && git submodule update".format(self.source_dir))
+
+        for patch in self.conan_data["patches"].get(qtconf.QT_VERSION, []):
+            self.output.info("Applying patch {}".format(patch["patch_file"]))
+            tools.patch(**patch)
+
         if self.settings.os != "Windows":
             self.run("chmod +x ./{}/configure".format(self.source_dir))
 
