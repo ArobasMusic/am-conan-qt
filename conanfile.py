@@ -192,6 +192,8 @@ class QtConan(ConanFile):
         ]
         args += ["-framework" if self.options.framework else "-no-framework"]
         args += ["QMAKE_MACOSX_DEPLOYMENT_TARGET={}".format(os_version if os_version else "10.13")]
+        if self.settings.arch == "armv8":
+            args += ["QMAKE_APPLE_DEVICE_ARCHS=arm64"]
         self.run("./configure {}".format(" ".join(args)), cwd=self.build_dir)
         self.run("make -j {}".format(cpu_count()), cwd=self.build_dir)
         self.run("make install", cwd=self.build_dir)
