@@ -1,4 +1,8 @@
+from email.policy import default
 import os
+
+from glob import glob
+from json import tool
 
 from distutils.spawn import find_executable
 from conans import ConanFile, tools, VisualStudioBuildEnvironment
@@ -13,39 +17,21 @@ class QtConan(ConanFile):
     source_dir = "qt5"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "canvas3d": [True, False],
-        "framework": [True, False],
-        "connectivity": [True, False],
-        "gamepad": [True, False],
-        "graphicaleffects": [True, False],
-        "location": [True, False],
         "opengl": ["no", "desktop", "dynamic"],
         "openssl": ["no", "yes", "linked"],
-        "serialport": [True, False],
-        "tools": [True, False],
-        "webengine": [True, False],
-        "websockets": [True, False],
+        "universalbinary": [True, False],
     }
+    no_copy_source = True
     exports = ["LICENSE.md", "qtconf.py"]
     exports_sources = ["patches/*"]
     default_options = (
-        "canvas3d=False",
-        "connectivity=False",
-        "framework=False",
-        "gamepad=False",
-        "graphicaleffects=False",
-        "location=False",
         "opengl=no",
         "openssl=yes",
-        "serialport=False",
-        "tools=False",
-        "webengine=False",
-        "websockets=False",
+        "universalbinary=False",
     )
     url = "https://github.com/ArobasMusic/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
-
 
     @property
     def build_dir(self):
@@ -55,13 +41,27 @@ class QtConan(ConanFile):
     def openssl_prefix_dir(self):
         return self.deps_cpp_info['openssl'].rootpath
 
+    def build_arches(self):
+        if self.settings.os == "Macos" and self.options.universalbinary:
+            yield "arm64"
+            yield "x86_64"
+        elif self.settings.arch == "armv8":
+            yield "arm64"
+        elif self.settings.arch == "x86_64":
+            yield "x86_64"
+
     def configure(self):
         if self.settings.arch == "x86":
             raise Exception("Unsupported architecture 'x86'")
+
         if self.settings.os != "Linux":
             del self.settings.build_type
+
         if self.settings.os == "Macos":
             del self.settings.os.version
+            if self.options.universalbinary:
+                del self.settings.arch
+
         if self.settings.os == "Windows":
             del self.settings.compiler.runtime
             if self.options.openssl in ["yes", "linked"]:
@@ -89,15 +89,13 @@ class QtConan(ConanFile):
                 self.requires("openssl/1.1.1g")
 
     def source(self):
-        submodules = ["qtbase", "qtimageformats", "qtmultimedia", "qtsvg", "qttools", "qttranslations", "qtxmlpatterns"]
+        submodules = ["qtbase", "qtimageformats", "qtsvg", "qttools", "qttranslations", "qtxmlpatterns"]
+
+        if self.settings.os == "Macos":
+            submodules.append("qtmacextras")
+
         if self.settings.os == "Windows":
             submodules.append("qtwinextras")
-        else:
-            submodules.append("qtmacextras")
-        for module in ["connectivity", "canvas3d", "gamepad", "graphicaleffects", "location", "serialport", "tools", "webengine", "websockets"]:
-            option = self.options.get_safe(module)
-            if option:
-                submodules.append("qt{}".format(module))
 
         git = tools.Git(self.source_dir)
         git.clone(**self.conan_data["sources"][qtconf.QT_VERSION])
@@ -119,16 +117,16 @@ class QtConan(ConanFile):
             "-nomake examples",
             "-nomake tests",
             "-no-sql-mysql",
-            "-force-debug-info",
-            "-separate-debug-info",
-            "-prefix {}".format(self.package_folder)
         ]
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self._build_msvc(args)
         elif self.settings.os == "Linux" and self.settings.compiler == "clang":
             self._build_linux_clang(args)
         elif self.settings.os == "Macos":
-            self._build_macos(args)
+            if self.options.universalbinary:
+                self._build_macos_univerval_binary(args)
+            else:
+                self._build_macos(args)
         else:
             raise Exception("Unsupport configuration os='{}' compiler={}".format(
                 self.settings.os,
@@ -151,6 +149,7 @@ class QtConan(ConanFile):
             "{}\\gnuwin32\\bin".format(self.build_folder),
             "{}\\qtrepotools\\bin".format(self.build_folder)
         ]})
+
         # it seems not enough to set the vcvars for older versions
         if self.settings.compiler == "Visual Studio":
             if self.settings.compiler.version == "14":
@@ -173,8 +172,12 @@ class QtConan(ConanFile):
 
         args += [
             "-direct2d",
-            "-debug-and-release"
+            "-debug-and-release",
+            "-force-debug-info",
+            "-separate-debug-info",
+            "-prefix {}".format(self.package_folder),
         ]
+
         env_build = VisualStudioBuildEnvironment(self)
         env.update(env_build.vars)
         with tools.environment_append(env):
@@ -184,19 +187,45 @@ class QtConan(ConanFile):
             self.run("{} && {} install".format(vcvars, build_command), cwd=self.build_dir)
 
     def _build_macos(self, args):
-        os_version = self.settings.get_safe('os.version')
+        configure = os.path.join(self.source_folder, "qt5", "configure")
+        os_version = self.settings.get_safe('os.version', default="10.13")
+        arch = "arm64" if self.settings.arch == "armv8" else "x86_64"
         args += [
             "-debug-and-release",
+            "-force-debug-info",
+            "-no-framework",
             "-platform macx-clang",
+            f"-prefix {self.package_folder}",
             "-silent",
+            "-separate-debug-info",
+            f"QMAKE_MACOSX_DEPLOYMENT_TARGET='{os_version}'",
+            f"QMAKE_APPLE_DEVICE_ARCHS='{arch}'"
         ]
-        args += ["-framework" if self.options.framework else "-no-framework"]
-        args += ["QMAKE_MACOSX_DEPLOYMENT_TARGET={}".format(os_version if os_version else "10.13")]
-        if self.settings.arch == "armv8":
-            args += ["QMAKE_APPLE_DEVICE_ARCHS=arm64"]
-        self.run("./configure {}".format(" ".join(args)), cwd=self.build_dir)
-        self.run("make -j {}".format(cpu_count()), cwd=self.build_dir)
-        self.run("make install", cwd=self.build_dir)
+        self.run(f"{configure} {' '.join(args)} ", cwd=self.build_folder)
+        self.run(f"make -j {cpu_count()}", cwd=self.build_folder)
+        self.run("make install", cwd=self.build_folder)
+
+    def _build_macos_univerval_binary(self, args):
+        configure = os.path.join(self.source_folder, "qt5", "configure")
+        os_version = self.settings.get_safe("os.version", default="10.13")
+        args += [
+            "-no-framework",
+            "-platform macx-clang",
+            "-release",
+            "-silent",
+            f"QMAKE_MACOSX_DEPLOYMENT_TARGET={os_version}",
+        ]
+        # build Qt for all arch
+        for arch in self.build_arches():
+            tools.mkdir(arch)
+            arch_build_dir = os.path.join(self.build_folder, arch)
+            arch_prefix_dir = os.path.join(arch_build_dir, "INSTALL")
+            self.run(
+                f"{configure} -prefix '{arch_prefix_dir}' {' '.join(args)} QMAKE_APPLE_DEVICE_ARCHS={arch}",
+                cwd=arch_build_dir
+            )
+            self.run(f"make -j {cpu_count()}", cwd=arch_build_dir)
+            self.run("make install", cwd=arch_build_dir)
 
     def _build_linux_clang(self, args):
         args += [
@@ -212,5 +241,116 @@ class QtConan(ConanFile):
         self.run("make install", cwd=self.build_dir)
 
     def package(self):
-        source_path = os.path.join(self.source_folder, self.source_dir)
-        self.copy("*", dst="src", src=source_path)
+        if self.settings.os == "Macos" and self.options.universalbinary:
+            self._package_macos_universal_binary()
+        else:
+            source_path = os.path.join(self.source_folder, self.source_dir)
+            self.copy("*", dst="src", src=source_path)
+
+    def _package_macos_universal_binary(self):
+        bin_folder = os.path.join(self.package_folder, "bin")
+        lib_folder = os.path.join(self.package_folder, "lib")
+        plugins_folder = os.path.join(self.package_folder, "plugins")
+
+        tools.mkdir(bin_folder)
+        tools.mkdir(lib_folder)
+        tools.mkdir(plugins_folder)
+
+        for dir in (
+            "include",
+            "mkspecs",
+            "phrasebooks",
+            os.path.join("plugins", "lib", "cmake"),
+            os.path.join("plugins", "lib", "pkgconfig"),
+            os.path.join("plugins", "lib", "metatypes"),
+        ):
+            self.copy("*", dst=dir, src=os.path.join(self.build_folder, "arm64", "INSTALL", dir))
+
+        for file in (
+            "lconvert",
+            "lprodump",
+            "lrelease",
+            "lrelease-pro",
+            "lupdate",
+            "lupdate-pro",
+            "macchangeqt",
+            "macdeployqt",
+            "moc",
+            "qcollectiongenerator",
+            "qdbus",
+            "qdbuscpp2xml",
+            "qdbusxml2cpp",
+            "qhelpgenerator",
+            "qlalr",
+            "qtattributionsscanner",
+            "qtdiag",
+            "qtpaths",
+            "qtplugininfo",
+            "qvkgen",
+            "rcc",
+            "tracegen",
+            "uic",
+            "xmlpatterns",
+            "xmlpatternsvalidator",
+        ):
+            inputs = [os.path.join(self.build_folder, arch, "INSTALL", "bin", file) for arch in self.build_arches()]
+            self.run(
+                f"lipo -create -output {file} {' '.join(inputs)}",
+                cwd=bin_folder
+            )
+
+        for lib in (
+            "libQt5DesignerComponents",
+            "libQt5Designer",
+            "libQt5Help",
+            "libQt5Widgets",
+            "libQt5OpenGL",
+            "libQt5Core",
+            "libQt5Svg",
+            "libQt5Network",
+            "libQt5PrintSupport",
+            "libQt5MacExtras",
+            "libQt5Concurrent",
+            "libQt5Test",
+            "libQt5Sql",
+            "libQt5DBus",
+            "libQt5XmlPatterns",
+            "libQt5Xml",
+            "libQt5Gui"
+        ):
+            file = f"{lib}.{qtconf.QT_VERSION}.dylib"
+            inputs = [os.path.join(self.build_folder, arch, "INSTALL", "lib", file) for arch in self.build_arches()]
+            self.run(
+                f"lipo -create -output {file} {' '.join(inputs)}",
+                cwd=lib_folder
+            )
+
+        for plugin in (
+            os.path.join("bearer", "libqgenericbearer.dylib",),
+            os.path.join("generic", "libqtuiotouchplugin.dylib",),
+            os.path.join("iconengines", "libqsvgicon.dylib",),
+            os.path.join("imageformats", "libqgif.dylib",),
+            os.path.join("imageformats", "libqicns.dylib",),
+            os.path.join("imageformats", "libqico.dylib",),
+            os.path.join("imageformats", "libqjpeg.dylib",),
+            os.path.join("imageformats", "libqmacheif.dylib",),
+            os.path.join("imageformats", "libqmacjp2.dylib",),
+            os.path.join("imageformats", "libqsvg.dylib",),
+            os.path.join("imageformats", "libqtga.dylib",),
+            os.path.join("imageformats", "libqtiff.dylib",),
+            os.path.join("imageformats", "libqwbmp.dylib",),
+            os.path.join("imageformats", "libqwebp.dylib",),
+            os.path.join("platforms", "libqcocoa.dylib",),
+            os.path.join("platforms", "libqminimal.dylib",),
+            os.path.join("platforms", "libqoffscreen.dylib",),
+            os.path.join("platformthemes", "libqxdgdesktopportal.dylib",),
+            os.path.join("printsupport", "libcocoaprintersupport.dylib",),
+            os.path.join("sqldrivers", "libqsqlite.dylib",),
+            os.path.join("styles", "libqmacstyle.dylib",),
+        ):
+            tools.mkdir(os.path.join(plugins_folder, os.path.dirname(plugin)))
+            inputs = [os.path.join(self.build_folder, arch, "INSTALL", "plugins", plugin) for arch in self.build_arches()]
+            self.run(
+                f"lipo -create -output {plugin} {' '.join(inputs)}",
+                cwd=plugins_folder,
+            )
