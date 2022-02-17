@@ -13,6 +13,10 @@ class QtTestConan(ConanFile):
 
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "virtualenv"
+    options = {
+        "universalbinary": [True, False],
+    }
+    default_options = "universalbinary=False",
 
     def build(self):
         cmake = CMake(self)
