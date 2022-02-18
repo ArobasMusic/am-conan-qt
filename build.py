@@ -1,32 +1,31 @@
-import os
 import platform
 
-from conanio.packager import ConanMultiPackager
-
-from conans.client.loader import parse_conanfile
-from conans.client.graph.python_requires import ConanPythonRequire
+from conanio.packager import ConanMultiPackager, split_colon_env
 
 def build():
     builder = ConanMultiPackager(
         build_policy="missing",
         username="arobasmusic"
     )
-    builder.add_common_builds()
-    if platform.system() == "Darwin":
-        os_versions = os.getenv("CONAN_OS_VERSIONS", "").strip()
 
-        if len(os_versions) != 0:
+    if platform.system() == "Darwin":
+        builder.add_common_builds(build_all_options_values=["Overloud:universalbinary"])
+
+        if os_versions := split_colon_env("CONAN_OS_VERSIONS"):
             builds = []
             for settings, options, env_vars, build_requires, reference in builder.items:
-                for os_version in map(lambda version: version.strip(), os_versions.split(',')):
+                for os_version in os_versions:
                     builds.append([
                         {**settings, "os.version": os_version},
                         options,
                         env_vars,
                         build_requires,
-                        reference
+                        reference,
                     ])
             builder.builds = builds
+    else:
+        builder.add_common_builds()
+
     builder.run()
 
 if __name__ == "__main__":
