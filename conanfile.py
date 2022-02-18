@@ -1,8 +1,5 @@
-from email.policy import default
 import os
-
-from glob import glob
-from json import tool
+import shutil
 
 from distutils.spawn import find_executable
 from conans import ConanFile, tools, VisualStudioBuildEnvironment
@@ -240,6 +237,11 @@ class QtConan(ConanFile):
         self.run("make -j {}".format(cpu_count()), cwd=self.build_dir)
         self.run("make install", cwd=self.build_dir)
 
+
+    def package_id(self):
+        if self.settings.os == "Macos" and self.options.universalbinary:
+            del self.info.settings.arch
+
     def package(self):
         if self.settings.os == "Macos" and self.options.universalbinary:
             self._package_macos_universal_binary()
@@ -260,9 +262,9 @@ class QtConan(ConanFile):
             "include",
             "mkspecs",
             "phrasebooks",
-            os.path.join("plugins", "lib", "cmake"),
-            os.path.join("plugins", "lib", "pkgconfig"),
-            os.path.join("plugins", "lib", "metatypes"),
+            os.path.join("lib", "cmake"),
+            os.path.join("lib", "pkgconfig"),
+            os.path.join("lib", "metatypes"),
         ):
             self.copy("*", dst=dir, src=os.path.join(self.build_folder, "arm64", "INSTALL", dir))
 
@@ -299,6 +301,11 @@ class QtConan(ConanFile):
                 cwd=bin_folder
             )
 
+        shutil.copyfile(
+            os.path.join(self.build_folder, "x86_64", "INSTALL", "bin", "qmake"),
+            os.path.join(self.package_folder, "bin", "qmake"),
+        )
+
         for lib in (
             "libQt5DesignerComponents",
             "libQt5Designer",
@@ -322,6 +329,16 @@ class QtConan(ConanFile):
             inputs = [os.path.join(self.build_folder, arch, "INSTALL", "lib", file) for arch in self.build_arches()]
             self.run(
                 f"lipo -create -output {file} {' '.join(inputs)}",
+                cwd=lib_folder
+            )
+
+            dylib_version = qtconf.QT_VERSION.split(".")
+            self.run(
+                f"ln -s {file} {lib}.{'.'.join(dylib_version[0:2])}.dylib",
+                cwd=lib_folder
+            )
+            self.run(
+                f"ln -s {file} {lib}.{'.'.join(dylib_version[0:1])}.dylib",
                 cwd=lib_folder
             )
 
