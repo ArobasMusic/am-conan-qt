@@ -30,13 +30,10 @@ class QtConan(ConanFile):
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
 
-    @property
-    def build_dir(self):
-        return os.path.join(self.build_folder, "qt5")
 
     @property
     def openssl_prefix_dir(self):
-        return self.deps_cpp_info['openssl'].rootpath
+        return self.deps_cpp_info['OpenSSL'].rootpath
 
     def build_arches(self):
         if self.settings.os == "Macos" and self.options.universalbinary:
@@ -161,28 +158,27 @@ class QtConan(ConanFile):
                 args += ["-angle"]
                 env.update({'QT_ANGLE_PLATFORM': 'd3d11'})
 
-        if self.options.openssl == "no":
-            args += ["-no-openssl"]
-        elif self.options.openssl == "yes":
-            args += ["-openssl", "OPENSSL_PREFIX={}".format(self.openssl_prefix_dir)]
-        else:
+        if self.options.openssl == "linked":
             args += ["-openssl-linked"]
+        elif self.options.openssl == "yes":
+            args += ["-openssl", f"OPENSSL_PREFIX={self.openssl_prefix_dir}"]
+        else:
+            args += ["-no-openssl"]
 
         args += [
             "-direct2d",
             "-debug-and-release",
             "-force-debug-info",
             "-separate-debug-info",
-            "-prefix {}".format(self.package_folder),
+            f"-prefix {self.package_folder}",
         ]
 
-        env_build = VisualStudioBuildEnvironment(self)
-        env.update(env_build.vars)
-        with tools.environment_append(env):
-            vcvars = tools.vcvars_command(self.settings)
-            self.run("{} && configure {}".format(vcvars, " ".join(args)), cwd=self.build_dir)
-            self.run("{} && {} {}".format(vcvars, build_command, " ".join(build_args)), cwd=self.build_dir)
-            self.run("{} && {} install".format(vcvars, build_command), cwd=self.build_dir)
+        build_env = tools.vcvars_dict(self)
+        configure_script = os.path.join(self.source_folder, "qt5", "configure.bat")
+        with tools.environment_append(build_env):
+            self.run(f"{configure_script} {' '.join(args)}", cwd=self.build_folder)
+            self.run(f"{build_command} {' '.join(build_args)}", cwd=self.build_folder)
+            self.run(f"{build_command} install", cwd=self.build_folder)
 
     def _build_macos(self, args):
         configure = os.path.join(self.source_folder, "qt5", "configure")
@@ -234,9 +230,11 @@ class QtConan(ConanFile):
         if self.options.get_safe("opengl") == "no":
             args += ["-no-opengl"]
 
-        self.run("./configure {}".format(" ".join(args)), cwd=self.build_dir)
-        self.run("make -j {}".format(cpu_count()), cwd=self.build_dir)
-        self.run("make install", cwd=self.build_dir)
+        configure_script = os.path.join(self.source_folder, "qt5", "configure.bat")
+
+        self.run(f"{configure_script} {' '.join(args)}", cwd=self.build_folder)
+        self.run("make -j {}".format(cpu_count()), cwd=self.build_folder)
+        self.run("make install", cwd=self.build_folder)
 
 
     def package_id(self):
