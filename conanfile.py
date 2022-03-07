@@ -77,6 +77,7 @@ class QtConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Windows":
+            self.build_requires("strawberryperl/5.30.0.1")
             if self.options.openssl == "yes":
                 self.build_requires("OpenSSL/1.1.1m-2@arobasmusic/stable")
 
