@@ -9,7 +9,7 @@ def build():
     )
 
     if platform.system() == "Darwin":
-        # builder.add_common_builds(build_all_options_values=["Qt:universalbinary"])
+        builder.add_common_builds(build_all_options_values=["Qt:universal_binary"])
         if os_versions := split_colon_env("CONAN_OS_VERSIONS"):
             builds = []
             for settings, options, env_vars, build_requires, reference in builder.items:
