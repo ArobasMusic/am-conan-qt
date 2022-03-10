@@ -16,7 +16,7 @@ class QtConan(ConanFile):
     options = {
         "opengl": ["no", "desktop", "dynamic"],
         "openssl": ["no", "yes", "linked"],
-        "universalbinary": [True, False],
+        "universal_binary": [True, False],
     }
     no_copy_source = True
     exports = ["LICENSE.md", "qtconf.py"]
@@ -24,7 +24,7 @@ class QtConan(ConanFile):
     default_options = (
         "opengl=no",
         "openssl=yes",
-        "universalbinary=False",
+        "universal_binary=False",
     )
     url = "https://github.com/ArobasMusic/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
@@ -36,7 +36,7 @@ class QtConan(ConanFile):
         return self.deps_cpp_info['OpenSSL'].rootpath
 
     def build_arches(self):
-        if self.settings.os == "Macos" and self.options.universalbinary:
+        if self.settings.os == "Macos" and self.options.universal_binary:
             yield "arm64"
             yield "x86_64"
         elif self.settings.arch == "armv8":
@@ -53,7 +53,7 @@ class QtConan(ConanFile):
 
         if self.settings.os == "Macos":
             del self.settings.os.version
-            if self.options.universalbinary:
+            if self.options.universal_binary:
                 del self.settings.arch
 
         if self.settings.os == "Windows":
@@ -118,7 +118,7 @@ class QtConan(ConanFile):
         elif self.settings.os == "Linux" and self.settings.compiler == "clang":
             self._build_linux_clang(args)
         elif self.settings.os == "Macos":
-            if self.options.universalbinary:
+            if self.options.universal_binary:
                 self._build_macos_univerval_binary(args)
             else:
                 self._build_macos(args)
@@ -238,11 +238,11 @@ class QtConan(ConanFile):
 
 
     def package_id(self):
-        if self.settings.os == "Macos" and self.options.universalbinary:
+        if self.settings.os == "Macos" and self.options.universal_binary:
             del self.info.settings.arch
 
     def package(self):
-        if self.settings.os == "Macos" and self.options.universalbinary:
+        if self.settings.os == "Macos" and self.options.universal_binary:
             self._package_macos_universal_binary()
         else:
             source_path = os.path.join(self.source_folder, self.source_dir)
