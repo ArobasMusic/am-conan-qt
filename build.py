@@ -8,8 +8,9 @@ def build():
         username="arobasmusic"
     )
 
+    builder.add_common_builds()
+
     if platform.system() == "Darwin":
-        builder.add_common_builds(build_all_options_values=["Qt:universal_binary"])
         if os_versions := split_colon_env("CONAN_OS_VERSIONS"):
             builds = []
             for settings, options, env_vars, build_requires, reference in builder.items:
@@ -22,8 +23,6 @@ def build():
                         reference,
                     ])
             builder.builds = builds
-    else:
-        builder.add_common_builds()
 
     builder.run()
 
