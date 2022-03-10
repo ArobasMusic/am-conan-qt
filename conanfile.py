@@ -261,6 +261,7 @@ class QtConan(ConanFile):
             "include",
             "mkspecs",
             "phrasebooks",
+            "translations",
             os.path.join("lib", "cmake"),
             os.path.join("lib", "pkgconfig"),
             os.path.join("lib", "metatypes"),
