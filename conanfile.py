@@ -5,11 +5,11 @@ from distutils.spawn import find_executable
 from conans import ConanFile, tools, VisualStudioBuildEnvironment
 from conans.tools import cpu_count
 
-import qtconf
+import pkgconf
 
 class QtConan(ConanFile):
     name = "Qt"
-    version = qtconf.PKG_VERSION
+    version = pkgconf.packageVersion
     description = "Conan.io package for Qt library."
     source_dir = "qt5"
     settings = "os", "arch", "compiler", "build_type"
@@ -19,7 +19,7 @@ class QtConan(ConanFile):
         "universal_binary": [True, False],
     }
     no_copy_source = True
-    exports = ["LICENSE.md", "qtconf.py"]
+    exports = ["LICENSE.md", "pkgconf.py"]
     exports_sources = ["patches/*"]
     default_options = (
         "opengl=no",
@@ -35,6 +35,7 @@ class QtConan(ConanFile):
     def openssl_prefix_dir(self):
         return self.deps_cpp_info['OpenSSL'].rootpath
 
+
     def build_arches(self):
         if self.settings.os == "Macos" and self.options.universal_binary:
             yield "arm64"
@@ -43,6 +44,7 @@ class QtConan(ConanFile):
             yield "arm64"
         elif self.settings.arch == "x86_64":
             yield "x86_64"
+
 
     def configure(self):
         if self.settings.arch == "x86":
@@ -72,16 +74,19 @@ class QtConan(ConanFile):
         if self.settings.os != "Macos":
             del self.options.framework
 
+
     def build_requirements(self):
         if self.settings.os == "Windows":
             self.build_requires("strawberryperl/5.30.0.1")
             if self.options.openssl == "yes":
                 self.build_requires("OpenSSL/1.1.1m-2@arobasmusic/stable")
 
+
     def requirements(self):
         if self.settings.os == "Windows":
             if self.options.openssl == "linked":
                 self.requires("OpenSSL/1.1.1m-2@arobasmusic/stable")
+
 
     def source(self):
         submodules = ["qtbase", "qtimageformats", "qtsvg", "qttools", "qttranslations", "qtxmlpatterns"]
@@ -93,20 +98,21 @@ class QtConan(ConanFile):
             submodules.append("qtwinextras")
 
         git = tools.Git(self.source_dir)
-        git.clone(**self.conan_data["sources"][qtconf.QT_VERSION])
+        git.clone(**self.conan_data["sources"][pkgconf.version])
 
         self.run("cd {} && perl init-repository --no-update --module-subset={}".format(self.source_dir, ",".join(submodules)))
         self.run("cd {} && git submodule update".format(self.source_dir))
 
-        for patch in self.conan_data["patches"].get(qtconf.QT_VERSION, []):
+        for patch in self.conan_data["patches"].get(pkgconf.version, []):
             self.output.info("Applying patch {}".format(patch["patch_file"]))
             tools.patch(**patch)
 
         if self.settings.os != "Windows":
             self.run("chmod +x ./{}/configure".format(self.source_dir))
 
+
     def build(self):
-        args = [
+        configure_args = [
             "-opensource",
             "-confirm-license",
             "-nomake examples",
@@ -114,14 +120,25 @@ class QtConan(ConanFile):
             "-no-sql-mysql",
         ]
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            self._build_msvc(args)
+            self._build_msvc(configure_args)
         elif self.settings.os == "Linux" and self.settings.compiler == "clang":
-            self._build_linux_clang(args)
+            self._build_linux_clang(configure_args)
         elif self.settings.os == "Macos":
             if self.options.universal_binary:
-                self._build_macos_univerval_binary(args)
+                self._build_macos_univerval_binary(configure_args)
             else:
-                self._build_macos(args)
+                build_arch = "arm64" if self.settings.arch == "armv8" else "x86_64"
+                configure_args += [
+                    "-debug-and-release",
+                    "-force-debug-info",
+                    "-separate-debug-info",
+                ]
+                self._build_macos(
+                    configure_args,
+                    build_arch,
+                    self.build_folder,
+                    self.package_folder,
+                )
         else:
             raise Exception("Unsupport configuration os='{}' compiler={}".format(
                 self.settings.os,
@@ -180,46 +197,42 @@ class QtConan(ConanFile):
             self.run(f"{build_command} {' '.join(build_args)}", cwd=self.build_folder)
             self.run(f"{build_command} install", cwd=self.build_folder)
 
-    def _build_macos(self, args):
-        configure = os.path.join(self.source_folder, "qt5", "configure")
+    def _build_macos(self, configure_args, build_arch, build_folder, install_prefix):
         os_version = self.settings.get_safe('os.version', default="10.13")
-        arch = "arm64" if self.settings.arch == "armv8" else "x86_64"
-        args += [
-            "-debug-and-release",
-            "-force-debug-info",
-            "-no-framework",
-            "-platform macx-clang",
-            f"-prefix {self.package_folder}",
-            "-silent",
-            "-separate-debug-info",
-            f"QMAKE_MACOSX_DEPLOYMENT_TARGET='{os_version}'",
-            f"QMAKE_APPLE_DEVICE_ARCHS='{arch}'"
-        ]
-        self.run(f"{configure} {' '.join(args)} ", cwd=self.build_folder)
-        self.run(f"make -j {cpu_count()}", cwd=self.build_folder)
-        self.run("make install", cwd=self.build_folder)
-
-    def _build_macos_univerval_binary(self, args):
         configure = os.path.join(self.source_folder, "qt5", "configure")
-        os_version = self.settings.get_safe("os.version", default="10.13")
-        args += [
+        configure_args += [
             "-no-framework",
             "-platform macx-clang",
-            "-release",
+            f"-prefix {install_prefix}",
             "-silent",
-            f"QMAKE_MACOSX_DEPLOYMENT_TARGET={os_version}",
+            f"QMAKE_MACOSX_DEPLOYMENT_TARGET='{os_version}'",
+            f"QMAKE_APPLE_DEVICE_ARCHS='{build_arch}'"
         ]
+        self.run(
+            f"{configure} {' '.join(configure_args)} ",
+            cwd=build_folder
+        )
+        self.run(
+            f"make -j {cpu_count()}",
+            cwd=build_folder
+        )
+        self.run(
+            "make install",
+            cwd=build_folder
+        )
+
+    def _build_macos_univerval_binary(self, configure_args):
+        configure_args += ["-release"]
         # build Qt for all arch
-        for arch in self.build_arches():
-            tools.mkdir(arch)
-            arch_build_dir = os.path.join(self.build_folder, arch)
-            arch_prefix_dir = os.path.join(arch_build_dir, "INSTALL")
-            self.run(
-                f"{configure} -prefix '{arch_prefix_dir}' {' '.join(args)} QMAKE_APPLE_DEVICE_ARCHS={arch}",
-                cwd=arch_build_dir
+        for build_arch in self.build_arches():
+            build_folder = os.path.join(self.build_folder, build_arch)
+            tools.mkdir(build_arch)
+            self._build_macos(
+                configure_args,
+                build_arch,
+                build_folder,
+                install_prefix=os.path.join(build_folder, "INSTALL"),
             )
-            self.run(f"make -j {cpu_count()}", cwd=arch_build_dir)
-            self.run("make install", cwd=arch_build_dir)
 
     def _build_linux_clang(self, args):
         args += [
@@ -306,39 +319,43 @@ class QtConan(ConanFile):
             os.path.join(self.package_folder, "bin", "qmake"),
         )
 
-        for lib in (
-            "libQt5DesignerComponents",
-            "libQt5Designer",
-            "libQt5Help",
-            "libQt5Widgets",
-            "libQt5OpenGL",
-            "libQt5Core",
-            "libQt5Svg",
-            "libQt5Network",
-            "libQt5PrintSupport",
-            "libQt5MacExtras",
-            "libQt5Concurrent",
-            "libQt5Test",
-            "libQt5Sql",
-            "libQt5DBus",
-            "libQt5XmlPatterns",
-            "libQt5Xml",
-            "libQt5Gui"
+        for lib_name in (
+            "DesignerComponents",
+            "Designer",
+            "Help",
+            "Widgets",
+            "OpenGL",
+            "Core",
+            "Svg",
+            "Network",
+            "PrintSupport",
+            "MacExtras",
+            "Concurrent",
+            "Test",
+            "Sql",
+            "DBus",
+            "XmlPatterns",
+            "Xml",
+            "Gui"
         ):
-            file = f"{lib}.{qtconf.QT_VERSION}.dylib"
-            inputs = [os.path.join(self.build_folder, arch, "INSTALL", "lib", file) for arch in self.build_arches()]
+            lib_stem = f"libQt5{lib_name}"
+            lib_file = f"{lib_stem}.{pkgconf.version}.dylib"
+
+            # create fat lib
+            inputs = [os.path.join(self.build_folder, arch, "INSTALL", "lib", lib_file) for arch in self.build_arches()]
             self.run(
-                f"lipo -create -output {file} {' '.join(inputs)}",
+                f"lipo -create -output {lib_file} {' '.join(inputs)}",
                 cwd=lib_folder
             )
 
-            dylib_version = qtconf.QT_VERSION.split(".")
+            # create fat lib file links
+            dylib_version = pkgconf.version.split(".")
             self.run(
-                f"ln -s {file} {lib}.{'.'.join(dylib_version[0:2])}.dylib",
+                f"ln -s {lib_file} {lib_stem}.{'.'.join(dylib_version[0:2])}.dylib",
                 cwd=lib_folder
             )
             self.run(
-                f"ln -s {file} {lib}.{'.'.join(dylib_version[0:1])}.dylib",
+                f"ln -s {lib_file} {lib_stem}.{'.'.join(dylib_version[0:1])}.dylib",
                 cwd=lib_folder
             )
 
