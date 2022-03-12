@@ -79,13 +79,13 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             self.build_requires("strawberryperl/5.30.0.1")
             if self.options.openssl == "yes":
-                self.build_requires("OpenSSL/1.1.1m-2@arobasmusic/stable")
+                self.build_requires("OpenSSL/1.1.1m-3@arobasmusic/stable")
 
 
     def requirements(self):
         if self.settings.os == "Windows":
             if self.options.openssl == "linked":
-                self.requires("OpenSSL/1.1.1m-2@arobasmusic/stable")
+                self.requires("OpenSSL/1.1.1m-3@arobasmusic/stable")
 
 
     def source(self):
@@ -100,8 +100,14 @@ class QtConan(ConanFile):
         git = tools.Git(self.source_dir)
         git.clone(**self.conan_data["sources"][pkgconf.version])
 
-        self.run("cd {} && perl init-repository --no-update --module-subset={}".format(self.source_dir, ",".join(submodules)))
-        self.run("cd {} && git submodule update".format(self.source_dir))
+        self.run(
+            f"perl init-repository --no-update --module-subset={','.join(submodules)}",
+            cwd=self.source_dir,
+        )
+        self.run(
+            f"git submodule update",
+            cwd=self.source_dir,
+        )
 
         for patch in self.conan_data["patches"].get(pkgconf.version, []):
             self.output.info("Applying patch {}".format(patch["patch_file"]))
