@@ -6,3 +6,5 @@ patches:
   "5.15.2":
     - patch_file: "patches/qiosurfacegraphicsbuffer.patch"
       base_path: "qt5/qtbase"
+    - patch_file: "patches/qstylesheetstyle.patch"
+      base_path: "qt5/qtbase"
