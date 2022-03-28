@@ -2,7 +2,13 @@ sources:
   "5.15.2":
     url: "https://code.qt.io/qt/qt5.git"
     branch: "v5.15.2"
+  "5.15.3":
+    url: "https://code.qt.io/qt/qt5.git"
+    branch: "v5.15.3-lts-lgpl"
 patches:
+  "5.15.3":
+    - patch_file: "patches/qiosurfacegraphicsbuffer.patch"
+      base_path: "qt5/qtbase"
   "5.15.2":
     - patch_file: "patches/qiosurfacegraphicsbuffer.patch"
       base_path: "qt5/qtbase"
