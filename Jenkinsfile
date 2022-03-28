@@ -6,7 +6,6 @@ pipeline {
         CONAN_CHANNEL = "testing"
         CONAN_STABLE_BRANCH_PATTERN = 'release/*'
         CONAN_BUILD_TYPES = 'Release'
-        CONAN_ARCHS = 'x86_64'
         CONAN_REMOTES = "http://artifactory.arobas-music.com/artifactory/api/conan/conan@True@arobasmusic"
         CONAN_UPLOAD = "http://artifactory.arobas-music.com/artifactory/api/conan/conan@True@arobasmusic"
         CONAN_PASSWORD_AROBASMUSIC = credentials('arobas-music-artifactory-password')
@@ -18,17 +17,18 @@ pipeline {
             parallel {
                 stage('macOS') {
                     agent {
-                        label 'macOS'
+                        label 'macOS&&arm64'
                     }
                     environment {
-                        CONAN_APPLE_CLANG_VERSIONS = "12.0"
+                        CONAN_ARCHS = "x86_64,armv8"
+                        CONAN_APPLE_CLANG_VERSIONS = "13.1"
                         CONAN_USER_HOME = "${env.WORKSPACE}"
                     }
                     steps {
                         sh '''
                             python3 -m venv .venv
                             source .venv/bin/activate
-                            pip install conan==1.45.0 conan_package_tools
+                            pip install conan==1.46.2 conan_package_tools
                             conan remove -f "*"
                             python "$PWD/build.py"
                         '''
@@ -48,6 +48,7 @@ pipeline {
                         label 'Windows'
                     }
                     environment {
+                        CONAN_ARCHS = 'x86_64'
                         CONAN_BASH_PATH = 'C:\\Program Files\\Git\\usr\\bin\\bash.exe'
                         CONAN_USER_HOME = "${env.WORKSPACE}"
                         CONAN_VISUAL_RUNTIMES = 'MD,MDd'
