@@ -89,7 +89,15 @@ class QtConan(ConanFile):
 
 
     def source(self):
-        submodules = ["qtbase", "qtimageformats", "qtsvg", "qttools", "qttranslations", "qtxmlpatterns"]
+        submodules = [
+            "qtbase",
+            "qtimageformats",
+            "qtsvg",
+            "qttools",
+            "qttranslations",
+            "qtxmlpatterns",
+            "qtmultimedia",
+        ]
 
         if self.settings.os == "Macos":
             submodules.append("qtmacextras")
@@ -336,6 +344,8 @@ class QtConan(ConanFile):
             "Network",
             "PrintSupport",
             "MacExtras",
+            "Multimedia",
+            "MultimediaWidgets",
             "Concurrent",
             "Test",
             "Sql",
@@ -366,6 +376,7 @@ class QtConan(ConanFile):
             )
 
         for plugin in (
+            os.path.join("audio", "libqtaudio_coreaudio.dylib"),
             os.path.join("bearer", "libqgenericbearer.dylib",),
             os.path.join("generic", "libqtuiotouchplugin.dylib",),
             os.path.join("iconengines", "libqsvgicon.dylib",),
@@ -380,10 +391,14 @@ class QtConan(ConanFile):
             os.path.join("imageformats", "libqtiff.dylib",),
             os.path.join("imageformats", "libqwbmp.dylib",),
             os.path.join("imageformats", "libqwebp.dylib",),
+            os.path.join("mediaservice", "libqavfcamera.dylib"),
+            os.path.join("mediaservice", "libqavfmediaplayer.dylib"),
+            os.path.join("mediaservice", "libqtmedia_audioengine.dylib"),
             os.path.join("platforms", "libqcocoa.dylib",),
             os.path.join("platforms", "libqminimal.dylib",),
             os.path.join("platforms", "libqoffscreen.dylib",),
             os.path.join("platformthemes", "libqxdgdesktopportal.dylib",),
+            os.path.join("playlistformats", "libqtmultimedia_m3u.dylib",),
             os.path.join("printsupport", "libcocoaprintersupport.dylib",),
             os.path.join("sqldrivers", "libqsqlite.dylib",),
             os.path.join("styles", "libqmacstyle.dylib",),
