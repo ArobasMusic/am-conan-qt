@@ -257,7 +257,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("opengl") == "no":
             args += ["-no-opengl"]
 
-        configure_script = os.path.join(self.source_folder, "qt5", "configure.bat")
+        configure_script = os.path.join(self.source_folder, "qt5", "configure")
 
         self.run(f"{configure_script} {' '.join(args)}", cwd=self.build_folder)
         self.run("make -j {}".format(cpu_count()), cwd=self.build_folder)
