@@ -1,0 +1,25 @@
+diff --git a/src/corelib/text/qbytearraymatcher.h b/src/corelib/text/qbytearraymatcher.h
+index 0eedfc1d20..7b80e2becd 100644
+--- a/src/corelib/text/qbytearraymatcher.h
++++ b/src/corelib/text/qbytearraymatcher.h
+@@ -40,6 +40,7 @@
+ #ifndef QBYTEARRAYMATCHER_H
+ #define QBYTEARRAYMATCHER_H
+
++#include <limits>
+ #include <QtCore/qbytearray.h>
+
+ QT_BEGIN_NAMESPACE
+diff --git a/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h b/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h
+index e070ba977d..0896917334 100644
+--- a/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h
++++ b/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h
+@@ -43,6 +43,8 @@
+ #include <qpa/qplatformgraphicsbuffer.h>
+ #include <private/qcore_mac_p.h>
+
++#include <CoreGraphics/CGColorSpace.h>
++
+ QT_BEGIN_NAMESPACE
+
+ class QIOSurfaceGraphicsBuffer : public QPlatformGraphicsBuffer

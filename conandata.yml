@@ -7,7 +7,7 @@ sources:
     branch: "v5.15.3-lts-lgpl"
 patches:
   "5.15.3":
-    - patch_file: "patches/qiosurfacegraphicsbuffer.patch"
+    - patch_file: "patches/qtbase.patch"
       base_path: "qt5/qtbase"
   "5.15.2":
     - patch_file: "patches/qiosurfacegraphicsbuffer.patch"
