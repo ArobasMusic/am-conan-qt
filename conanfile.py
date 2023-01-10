@@ -251,7 +251,8 @@ class QtConan(ConanFile):
     def _build_linux_clang(self, args):
         args += [
             "-silent",
-            "-platform linux-clang"
+            "-platform linux-clang",
+            "-prefix {}".format(self.package_folder)
         ]
 
         if self.options.get_safe("opengl") == "no":
