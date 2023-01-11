@@ -28,7 +28,7 @@ pipeline {
                         sh '''
                             python3 -m venv .venv
                             source .venv/bin/activate
-                            pip install conan==1.46.2 conan_package_tools
+                            pip install conan==1.56.0 conan_package_tools
                             conan remove -f "*"
                             python "$PWD/build.py"
                         '''
@@ -58,7 +58,7 @@ pipeline {
                         sh '''
                             python -m venv .venv
                             source .venv/Scripts/activate
-                            pip install conan==1.46.2 conan_package_tools
+                            pip install conan==1.56.0 conan_package_tools
                             conan remove -f "*"
                             python "$PWD/build.py"
                         '''
